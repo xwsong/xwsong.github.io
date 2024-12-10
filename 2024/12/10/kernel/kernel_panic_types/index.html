@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="This arctile is to generic types of kernel panic, describe the princeples and what can trigger a specific type of kernel panic. Table of contents Introduction The Types Of Kernel Panic NULL pointer de">
+<meta property="og:type" content="article">
+<meta property="og:title" content="About kernel panic you need to know">
+<meta property="og:url" content="http://example.com/2024/12/10/kernel/kernel_panic_types/index.html">
+<meta property="og:site_name" content="Blogs For Linux Essential">
+<meta property="og:description" content="This arctile is to generic types of kernel panic, describe the princeples and what can trigger a specific type of kernel panic. Table of contents Introduction The Types Of Kernel Panic NULL pointer de">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-10T02:32:01.301Z">
+<meta property="article:modified_time" content="2024-12-10T02:32:01.301Z">
+<meta property="article:author" content="Bruce Song">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/12/10/kernel/kernel_panic_types/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>About kernel panic you need to know | Blogs For Linux Essential</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blogs For Linux Essential</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/12/10/kernel/kernel_panic_types/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Bruce Song">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blogs For Linux Essential">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          About kernel panic you need to know
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-10 10:32:01" itemprop="dateCreated datePublished" datetime="2024-12-10T10:32:01+08:00">2024-12-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>This arctile is to generic types of kernel panic, describe the princeples and what can trigger a specific type of kernel panic.</p>
+<h1 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h1><ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#type_panic">The Types Of Kernel Panic</a><ol>
+<li><a href="#NULLpointerkdereference">NULL pointer dereference</a></li>
+<li><a href="#unable_pf">Unable to handle page fault</a></li>
+<li><a href="#hard&softlockup">Hard&#x2F;Soft Lockup</a></li>
+<li><a href="#task_hang">Task Hang</a></li>
+<li><a href="#bug_macro">BUG&#x2F;BUG_ON</a></li>
+<li><a href="#stack_overflow">Kernel Stack Overflow</a></li>
+<li><a href="#rcu_stall">RCU stall</a></li>
+<li><a href="#double_fault">Double Fault</a></li>
+</ol>
+</li>
+<li><a href="#ns_knowledge">Necessary Knowledge</a> </li>
+<li><a href="#reference">References</a></li>
+</ol>
+<h2 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1 Introduction "></a>1 Introduction <a name="introduction"></a></h2><h3 id="What-is-kernel-panic-and-why"><a href="#What-is-kernel-panic-and-why" class="headerlink" title="What is kernel panic and why?"></a>What is kernel panic and why?</h3><p>A kernel panic is a safety measure taken by an operating system’s kernel upon detecting an internal fatal error in which either it is unable to safely recover or continuing to run the system would have a higher risk of major data loss. The term is largely specific to Unix and Unix-like systems. The equivalent on Microsoft Windows operating systems is a stop error, often called a “blue screen of death”. <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kernel_panic">[1]</a></p>
+<h2 id="2-The-ypes-of-Kernel-Panic"><a href="#2-The-ypes-of-Kernel-Panic" class="headerlink" title="2 The ypes of Kernel Panic"></a>2 The ypes of Kernel Panic<a name="type_panic"></a></h2><h3 id="2-1-NULL-pointer-dereference"><a href="#2-1-NULL-pointer-dereference" class="headerlink" title="2.1 NULL pointer dereference "></a>2.1 NULL pointer dereference <a name="NULLpointerdereference"></a></h3><p>This kind of panic info implies the kernel was using a NULL pointer to access memory.</p>
+<p>A real example:<br>[998287.514381] BUG: unable to handle kernel NULL pointer dereference at 0000000000000004<br>[998287.514429] IP: set_root+0x47&#x2F;0xc0<br>[998287.514444] PGD 0 P4D 0<br>[998287.514459] Oops: 0000 [#1] SMP NOPTI<br>[998287.514475] CPU: 4 PID: 6571 Comm: stat Not tainted 4.12.14-122.231-default #1 SLE12-SP5<br>[998287.514539] task: ffffa0aad66b0bc0 task.stack: ffffb8209dd40000<br>[998287.514560] RIP: 0010:set_root+0x47&#x2F;0xc0<br>[998287.514575] RSP: 0018:ffffb8209dd43c88 EFLAGS: 00010246<br>[998287.514593] RAX: 0000000000000000 RBX: ffffb8209dd43d40 RCX:0000000000000000<br>[998287.514617] RDX: 0000000000000000 RSI: 0000000000000040 RDI:ffffb8209dd43d40<br>[998287.514641] RBP: ffffb8209dd43ca0 R08: 0000000000000000 R09:0000000000000f8c<br>[998287.514665] R10: 0000000000000058 R11: 0000000000000058 R12:ffffa0b99387cf00<br>[998287.514688] R13: ffffb8209dd43e58 R14: 0000000000000041 R15:00000000000007ff<br>[998287.514712] FS: 00007fe0c088d700(0000) GS:ffffa0b9b2d00000(0000) knlGS:0000000000000000<br>[998287.514738] CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033<br>[998287.514757] CR2: 0000000000000004 CR3: 0000000fdc29e003 CR4:00000000007606e0<br>[998287.514814] DR0: 0000000000000000 DR1: 0000000000000000 DR2:0000000000000000<br>[998287.514839] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7:0000000000000400<br>[998287.514862] PKRU: 55555554<br>[998287.514873] Call Trace:<br>[998287.514887] path_init+0x1d6&#x2F;0x330<br>[998287.514900] path_lookupat+0x22&#x2F;0x210<br>[998287.514936] ? _nfs4_proc_getattr+0xbe&#x2F;0xd0 [nfsv4]<br>[998287.514955] filename_lookup+0x9c&#x2F;0x150<br>[998287.515572] ? __nfs_revalidate_inode+0x10c&#x2F;0x360 [nfs]<br>[998287.516078] ? path_get+0x11&#x2F;0x30<br>[998287.516587] ? __audit_getname+0x97&#x2F;0xb0<br>[998287.517095] ? getname_flags+0xf7&#x2F;0x1f0<br>[998287.517589] vfs_statx+0x64&#x2F;0xc0<br>[998287.518077] SYSC_newstat+0x26&#x2F;0x50<br>[998287.518566] ? syscall_trace_enter+0x1b4&#x2F;0x2a0<br>[998287.519043] ? __audit_syscall_exit+0x1fa&#x2F;0x2b0<br>[998287.519505] do_syscall_64+0x74&#x2F;0x160<br>[998287.519974] entry_SYSCALL_64_after_hwframe+0x7d&#x2F;0xe7</p>
+<p>The first question is why the fault address is 0000000000000004. Generally, the value is an offset of a structure instance, so the address of the structure instance is NULL, which is 0000000000000000. 4 is the offset value of one of the members. So, when meeting a panic like this the first thing we should do is to disassemble the code of where IP instruction is in, here is set_root, and find out which pointer is NULL in c code level. The possible causes are</p>
+<ol>
+<li>A pointer is manually assigned to NULL by some where, which is definitely incorrect with the relevant code logic.</li>
+<li>A pointer is assigned to NULL as expected. But some code blocks still use the pointer incorrectly, also known as UAF(use after free).</li>
+<li>Another situation is quite tricky. It is kind of similar to 2). But in the fault line, the author would expect the pointer should be invalid, actually not. This kind of error is because the value of pointer isn’t consistent with the value of the pointer in cache of CPU, which means the relevant code logic looks correct, while CPU doesn’t synchronize memory data correctly, then a NULL pointer dereference would be triggered.</li>
+</ol>
+<h3 id="2-2-Unable-to-handle-page-fault"><a href="#2-2-Unable-to-handle-page-fault" class="headerlink" title="2.2 Unable to handle page fault "></a>2.2 Unable to handle page fault <a id="unable_pf"></a></h3><p>This kind of panic is similar to the NULL pointer one in terms of data corrupted. The difference is that the fault address of NULL pointers is less than one page size, while the address of page fault one is greater or equal than one page size.</p>
+<p>A real example:</p>
+<p>[4492219.834650] BUG: unable to handle kernel paging request at ffff8e8d3031d710<br>[4492219.834697] IP: __audit_inode_child+0x12a&#x2F;0x340<br>[4492219.834717] PGD 3f62a7067 P4D 3f62a7067 PUD ff04a0063 PMD fda91c063 PTE 1469d3f9918d6133<br>[4492219.834751] Oops: 0009 [#1] SMP NOPTI<br>[4492219.834769] CPU: 23 PID: 52391 Comm: cvd Not tainted 4.12.14-122.194-default #1 SLE12-SP5<br>[4492219.834839] task: ffff8e8fabd8cb80 task.stack: ffffb83e13228000<br>[4492219.834863] RIP: 0010:__audit_inode_child+0x12a&#x2F;0x340<br>[4492219.834883] RSP: 0018:ffffb83e1322b850 EFLAGS: 00010297<br>[4492219.834905] RAX: 0000000000000000 RBX: ffff8e8e5baf0e48 RCX: ffff8e9be8eb8100<br>[4492219.834932] RDX: 0000000000000001 RSI: ffff8e8f7d6bc240 RDI: ffff8e8e5baf0c00<br>[4492219.834958] RBP: ffff8e8f7d6bc278 R08: 0000000000000000 R09: 0000000000000001<br>[4492219.834985] R10: 0000000000000000 R11: 000000000000000f R12: ffff8e9be8eb8100<br>[4492219.835011] R13: ffffffffa51cdb40 R14: 0000000000000000 R15: ffff8e8d3031d700<br>[4492219.835038] FS: 00007f852a8cf700(0000) GS:ffff8e9bf31c0000(0000) knlGS:0000000000000000<br>[4492219.835068] CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033<br>[4492219.835090] CR2: ffff8e8d3031d710 CR3: 0000000fdc960001 CR4: 00000000007606e0<br>[4492219.835157] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000<br>[4492219.835186] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400<br>[4492219.835213] PKRU: 55555554<br>[4492219.835225] Call Trace:<br>[4492219.835244] debugfs_create_dir+0xe0&#x2F;0x100<br>[4492219.835277] rpc_clnt_debugfs_register+0x7a&#x2F;0x130 [sunrpc]<br>[4492219.835307] rpc_client_register+0x31&#x2F;0x170 [sunrpc]<br>[4492219.835335] rpc_new_client+0x1e1&#x2F;0x2d0 [sunrpc]<br>[4492219.835361] rpc_create_xprt+0x55&#x2F;0x220 [sunrpc]<br>[4492219.835381] ? __debugfs_create_file+0xca&#x2F;0x110<br>[4492219.835408] ? rpc_xprt_debugfs_register+0xa6&#x2F;0xe0 [sunrpc]<br>[4492219.836048] rpc_create+0x17b&#x2F;0x270 [sunrpc]<br>[4492219.836666] ? lock_timer_base+0x67&#x2F;0x90<br>[4492219.837265] ? internal_add_timer+0x1a&#x2F;0x70<br>[4492219.837858] rpcb_create+0x83&#x2F;0xa0 [sunrpc]<br>[4492219.838465] rpcb_getport_async+0x1af&#x2F;0x4f0 [sunrpc]<br>[4492219.839049] ? __wait_on_bit+0x74&#x2F;0x90<br>[4492219.839617] ? __rpc_wait_for_completion_task+0x30&#x2F;0x30 [sunrpc]<br>[4492219.840200] ? out_of_line_wait_on_bit+0x6e&#x2F;0x80<br>[4492219.840773] ? rpc_setup_pipedir_sb+0xf0&#x2F;0xf0 [sunrpc]<br>[4492219.841331] ? rpc_setup_pipedir_sb+0xf0&#x2F;0xf0 [sunrpc]<br>[4492219.841879] __rpc_execute+0xdd&#x2F;0x460 [sunrpc]<br>[4492219.842408] rpc_run_task+0xd4&#x2F;0x120 [sunrpc]<br>[4492219.842945] rpc_call_sync+0x3f&#x2F;0x80 [sunrpc]</p>
+<p>When this situation happens, it is probably</p>
+<ol>
+<li>the address is an invalid pointer which is similar to situation 1.</li>
+<li>the page table(pt) of the current process is incorrect. The pt might have gotten corrupted. Then you need to check the memory address that the page table is placed in, find out if some code overwrote the relevant page or memory.</li>
+</ol>
+<h3 id="2-3-Hard-Soft-Lockup"><a href="#2-3-Hard-Soft-Lockup" class="headerlink" title="2.3 Hard&#x2F;Soft Lockup"></a>2.3 Hard&#x2F;Soft Lockup<a id="hard&softlockup"></a></h3><h4 id="What-is-hard-lockup"><a href="#What-is-hard-lockup" class="headerlink" title="What is hard lockup?"></a>What is hard lockup?</h4><p>A ‘hardlockup’ is defined as a bug that causes the CPU to loop in kernel mode for more than 10 seconds without letting other interrupts have a chance to run. <a target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/lockup-watchdogs.html">[2]</a></p>
+<p>1)You can stop the panic by unsetting hardlockup_panic with sysctl<br>sysctl -w kernel.hardlockup_panic&#x3D;1<br>2)Or append nmi_watchdog&#x3D;0 in kernel command line<br>3)Or unset during compilation with CONFIG_BOOTPARAM_HARDLOCKUP_PANIC&#x3D;n</p>
+<p>From my experience, this kind of error is generally because of hardware issues as it’s impossible to disable interrupt in code level for so long time, I’ve never seen a software bug to trigger this error. You can check the bit9 of EFLAGS on the x86 platform if the interrupt is disabled or not when hitting a panic like this. The principle of it is because the value of hrtimer_interrupts doesn’t get updated as no interrupts can be routed to the kernel.</p>
+<p>However, I’m not 100% sure if there is a software issue triggering an error like this. You need to analyze the panic info and kernel code accordingly.</p>
+<h4 id="What-is-soft-lockup"><a href="#What-is-soft-lockup" class="headerlink" title="What is soft lockup?"></a>What is soft lockup?</h4><p>A ‘soft lockup’ is defined as a bug that causes the kernel to loop in kernel mode for more than 20 seconds, without giving other tasks a chance to run， which implies no scheduled events happened on a CPU. <a target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/lockup-watchdogs.html">[2]</a></p>
+<p>From my experience, most soft lockups are triggered by holding busy locks for more than 20s, the most common type of it is spin lock. So just check the code of the function on the top of the call trace, and find out if there is a spin lock is hold for a long time.</p>
+<p>I also saw another way says there are too many interrupts that can block schedule events. I’ve never seen such a case so far.</p>
+<p>If you don’t want to panic your system when meeting soft lockup, you can disable the behavior with the following ways:</p>
+<ol>
+<li>disable panic at runtime over<br>sysctl -w kernel.softlockup_panic&#x3D;0</li>
+<li>add softlockup_panic&#x3D;0 to kernel command line</li>
+<li>disable panic during compilation of kernel over setting<br>CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC&#x3D;n</li>
+</ol>
+<h3 id="2-4-Task-hang"><a href="#2-4-Task-hang" class="headerlink" title="2.4 Task hang"></a>2.4 Task hang<a id="task_hang"></a></h3><p>A task hang implies a task&#x2F;process hasn’t been scheduled for a long time. The time value can be set with kernel.hung_task_timeout_secs.</p>
+<p>Generally, the reason why a task&#x2F;process doesn’t get scheduled is because it waited on a list with TASK_UNINTERRUPTIBLE state for a long time. When you see the state of it over ps command like<br>“ps -eo pid,stat”</p>
+<p>There would be a ‘D’, maybe also with other state signs. In this scenario, we can set the following kernel options to trigger a kernel panic and get a kernel core dump used to analyze more about it:</p>
+<p>sysctl -a kernel.hung_task_panic&#x3D;1<br>sysctl -a kernel.hung_task_timeout_secs&#x3D;120</p>
+<p>What we need to do with the kernel core dump is to check the wait list and the data inside of the relevant lock that is waited, and find out the owner of the lock, then see the stack trace of the owner and understand what it was doing at that moment.</p>
+<h3 id="2-5-BUG-BUG-ON"><a href="#2-5-BUG-BUG-ON" class="headerlink" title="2.5 BUG&#x2F;BUG_ON"></a>2.5 BUG&#x2F;BUG_ON<a id="bug_macro"></a></h3><p>The BUG macro is to print some useful info first then, call panic() to crash kernel. The BUG_ON is to check a condition first, if it’s true then call BUG() macro. When hitting this situation, there would be a line with prefix “kernel  BUG at  …”, which is used to show you where the bug is from.</p>
+<p>A real example:<br>[ 2936.363067] kernel BUG at &#x2F;home&#x2F;rishi&#x2F;doc_linux_kernel_workbook&#x2F;doc&#x2F;code&#x2F;05_bug_reporting&#x2F;01_bugon&#x2F;mybugondriver.c:45!<br>[ 2936.363101] invalid opcode: 0000 [#1] SMP<br>[ 2936.363118] Modules linked in: mybugondriver(OE) ppdev vboxvideo ttm drm_kms_helper drm snd_intel8x0 fb_sys_fops snd_ac97_codec syscopyarea ac97_bus sysfillrect snd_pcm joydev sysimgblt input_leds snd_timer snd soundcore serio_raw i2c_piix4 parport_pc vboxguest 8250_fintek parport mac_hid ib_iser rdma_cm iw_cm ib_cm ib_sa ib_mad ib_core ib_addr iscsi_tcp libiscsi_tcp libiscsi scsi_transport_iscsi autofs4 btrfs raid10 raid456 async_raid6_recov async_memcpy async_pq async_xor async_tx xor raid6_pq libcrc32c raid1 raid0 multipath linear hid_generic usbhid hid crct10dif_pclmul crc32_pclmul ghash_clmulni_intel aesni_intel aes_x86_64 lrw gf128mul glue_helper ablk_helper cryptd ahci psmouse libahci e1000 pata_acpi fjes video<br>[ 2936.363407] CPU: 0 PID: 1766 Comm: bash Tainted: G OE 4.4.0-62-generic #83-Ubuntu<br>[ 2936.363429] Hardware name: innotek GmbH VirtualBox&#x2F;VirtualBox, BIOS VirtualBox 12&#x2F;01&#x2F;2006<br>[ 2936.363451] task: ffff8800d8deb800 ti: ffff880035734000 task.ti: ffff880035734000<br>[ 2936.363471] RIP: 0010:[<ffffffffc03e618e>] [<ffffffffc03e618e>] my_proc_write+0xae&#x2F;0xc0 [mybugondriver]<br>[ 2936.363501] RSP: 0018:ffff880035737e78 EFLAGS: 00010246<br>[ 2936.363516] RAX: 0000000000000000 RBX: 0000000000000002 RCX: 00000000000032a5<br>[ 2936.363535] RDX: 00000000000032a4 RSI: ffff88011b41a020 RDI: ffff880116801e00<br>[ 2936.363553] RBP: ffff880035737e90 R08: 000000000001a020 R09: ffffffffc03e615c<br>[ 2936.363572] R10: ffffea0004572b40 R11: 0000000000000239 R12: ffff880115cad950<br>[ 2936.363592] R13: 0000000001189408 R14: 0000000000000002 R15: 0000000000000000<br>[ 2936.363611] FS: 00007f4b6fc64700(0000) GS:ffff88011b400000(0000) knlGS:0000000000000000<br>[ 2936.363633] CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033<br>[ 2936.363648] CR2: 00007ffedb58b4b8 CR3: 00000000d597d000 CR4: 00000000000406f0<br>[ 2936.363669] Stack:<br>[ 2936.363676] ffff8800344a4a80 fffffffffffffffb ffff880035737f18 ffff880035737eb0<br>[ 2936.363699] ffffffff8127bee2 ffff8800da934400 0000000001189408 ffff880035737ec0<br>[ 2936.363723] ffffffff8120e168 ffff880035737f00 ffffffff8120eaf9 ffffffff810caeb1<br>[ 2936.363746] Call Trace:<br>[ 2936.363758] [<ffffffff8127bee2>] proc_reg_write+0x42&#x2F;0x70<br>[ 2936.363784] [<ffffffff8120e168>] __vfs_write+0x18&#x2F;0x40<br>[ 2936.363799] [<ffffffff8120eaf9>] vfs_write+0xa9&#x2F;0x1a0<br>[ 2936.364337] [<ffffffff810caeb1>] ? __raw_callee_save___pv_queued_spin_unlock+0x11&#x2F;0x20<br>[ 2936.365035] [<ffffffff8120f7b5>] SyS_write+0x55&#x2F;0xc0<br>[ 2936.365697] [<ffffffff818385f2>] entry_SYSCALL_64_fastpath+0x16&#x2F;0x71<br>[ 2936.366236] Code: f8 02 74 29 7e 20 83 f8 03 74 11 83 f8 04 75 11 48 c7 c7 e0 70 3e c0 e8 c5 6f da c0 e8 7c 1a 01 c1 48 89 d8 eb 9c 83 e8 01 75 f6 &lt;0f&gt; 0b 0f 0b 0f 1f 40 00 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 44</p>
+<p>[ 2936.367912] RIP [<ffffffffc03e618e>] my_proc_write+0xae&#x2F;0xc0 [mybugondriver]<br>[ 2936.368464] RSP <ffff880035737e78><br>[ 2936.369000] fbcon_switch: detected unhandled fb_set_par error, error code -16<br>[ 2936.370289] fbcon_switch: detected unhandled fb_set_par error, error code -16<br>[ 2936.371596] —[ end trace 064cb0dbcc2892d3 ]—</p>
+<p>These two macros are generally added because an unexpected fatal error is happening. In other words, when the condition is true, there must be a BUG. So this situation is easy to understand where is wrong. You should check all the spots that might make the condition true.</p>
+<h3 id="2-6-Kernel-stack-overflow"><a href="#2-6-Kernel-stack-overflow" class="headerlink" title="2.6 Kernel stack overflow"></a>2.6 Kernel stack overflow<a id="stack_overflow"></a></h3><p>A kernel stack is used to perform the code of kernel space. It’s 2 pages big on x86_64 arch. Generally, 2 pages are enough for any call patch in kernel. But there are always some bugs, so sometimes a stack operation might read&#x2F;write something beyond the boundary of kernel stack. Before VMAP_STACK got merged to mainline, it’s hard to track errors like this. With VMAP_STACK, we can get the notification when reading&#x2F;writing something to much on kernel stack</p>
+<p>An example from <a target="_blank" rel="noopener" href="https://access.redhat.com/solutions/6128111">[3]</a>:<br>[ 6932.427010] BUG: stack guard page was hit at 00000000182b894e (stack is 0000000031e90a73..00000000d798f80a)<br>[ 6932.427390] kernel stack overflow (double-fault): 0000 [#1] SMP NOPTI<br>[ 6932.427730] CPU: 20 PID: 60530 Comm: qemu-kvm Kdump: loaded Tainted: G I ——— - - 4.18.0-240.10.1.el8_3.x86_64 #1<br>[ 6932.428498] Hardware name: Dell Inc. PowerEdge R740&#x2F;0WXD1Y, BIOS 2.10.2 02&#x2F;24&#x2F;2021<br>[ 6932.429040] RIP: 0010:kvm_set_irq+0x46&#x2F;0x130 [kvm]<br>[ 6932.429528] Code: f3 48 81 ec d0 00 00 00 65 48 8b 04 25 28 00 00 00 48 89 84 24 c8 00 00 00 31 c0 0f 1f 44 00 00 4d 8d bd 40 30 02 00 4c 89 ff <e8> 95 f6 85 f9 44 89 f2 4c 89 ef 48 8d 74 24 08 89 44 24 04 e8 11<br>[ 6932.430675] RSP: 0018:ffffab1800debf38 EFLAGS: 00010246<br>[ 6932.431246] RAX: 0000000000000000 RBX: 0000000000000001 RCX: 0000000000000000<br>[ 6932.431851] RDX: 000000000000000b RSI: 0000000000000001 RDI: ffffab17d9b64040<br>[ 6932.432419] RBP: 0000000000000000 R08: 0000000000000000 R09: 0000000000000000<br>[ 6932.432825] R10: ffff8c3f31f28000 R11: 0000000000000000 R12: 0000000000000000<br>[ 6932.433157] R13: ffffab17d9b41000 R14: 000000000000000b R15: ffffab17d9b64040<br>[ 6932.433488] FS: 00007fcb72fcd680(0000) GS:ffff8bc2bfa80000(0000) knlGS:0000000000000000<br>[ 6932.433833] CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033<br>[ 6932.434173] CR2: ffffab1800debf28 CR3: 00000069fd808001 CR4: 00000000007626e0<br>[ 6932.434516] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000<br>[ 6932.434869] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400<br>[ 6932.435213] PKRU: 55555554<br>[ 6932.435556] Call Trace:<br>[ 6932.435930] irqfd_resampler_ack+0x32&#x2F;0x90 [kvm]<br>[ 6932.436295] kvm_notify_acked_irq+0x5f&#x2F;0xc0 [kvm]<br>[ 6932.436652] kvm_ioapic_update_eoi_one.isra.10+0x3d&#x2F;0x140 [kvm]<br>[ 6932.437011] ioapic_set_irq+0x240&#x2F;0x2d0 [kvm]<br>[ 6932.437358] kvm_ioapic_set_irq+0x61&#x2F;0x90 [kvm]<br>[ 6932.437715] kvm_set_irq+0xa1&#x2F;0x130 [kvm]<br>[…snip…]<br>[ 6932.525049] do_vfs_ioctl+0xa4&#x2F;0x640<br>[ 6932.525494] ksys_ioctl+0x60&#x2F;0x90<br>[ 6932.525888] __x64_sys_ioctl+0x16&#x2F;0x20<br>[ 6932.526282] do_syscall_64+0x5b&#x2F;0x1a0<br>[ 6932.526703] entry_SYSCALL_64_after_hwframe+0x65&#x2F;0xca<br>[ 6932.527099] RIP: 0033:0x7fcb6dcbd88b<br>[ 6932.527493] Code: 0f 1e fa 48 8b 05 fd 95 2c 00 64 c7 00 26 00 00 00 48 c7 c0 ff ff ff ff c3 66 0f 1f 44 00 00 f3 0f 1e fa b8 10 00 00 00 0f 05 &lt;48&gt; 3d 01 f0 ff ff 73 01 c3 48 8b 0d cd 95 2c 00 f7 d8 64 89 01 48<br>[ 6932.528233] RSP: 002b:00007ffc904196b8 EFLAGS: 00000246 ORIG_RAX: 0000000000000010<br>[ 6932.528655] RAX: ffffffffffffffda RBX: 000055721dcba5c0 RCX: 00007fcb6dcbd88b<br>[ 6932.528940] RDX: 00007ffc90419720 RSI: ffffffffc008ae67 RDI: 0000000000000017<br>[ 6932.529213] RBP: 0000000000000001 R08: 000000000000000b R09: 000000000000002c<br>[ 6932.529487] R10: 00007fcb6df87ba0 R11: 0000000000000246 R12: 000000000000000b<br>[ 6932.529772] R13: 0000000000000001 R14: 000055721c08f770 R15: 000055721dc23854</p>
+<p>For this situation, we need to disassemble the last function. Here it’s kvm_set_irq(). Find out which parameter&#x2F;data is incorrect. But not all scenarios are caused by software issues. I’ve ever seen an issue that over the boundary of stack is because a “rep mov” instruction was performed once more than expected. Then a kernel stack overflow was reported. This issue turned out to be an issue from intel ucode.</p>
+<h3 id="2-7-RCU-stall"><a href="#2-7-RCU-stall" class="headerlink" title="2.7 RCU stall"></a>2.7 RCU stall<a id="rcu_stall"></a></h3><p>This type of panic is quite complex. There are some reasons to cause the panic. You can reference <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/RCU/stallwarn.txt">[4]</a> to learn more. My knowledge about rcu stall is still not enough, will update later. To generate a panic during rc stall, you can set the option below:</p>
+<p>sysctl -w kernel.panic_on_rcu_stall&#x3D;1</p>
+<h3 id="2-8-double-fault"><a href="#2-8-double-fault" class="headerlink" title="2.8 double fault"></a>2.8 double fault<a id="double_fault"></a></h3><p>Will update later.</p>
+<p>Note that a panic for hard&#x2F;soft lockup and hung tasks is not necessary. It depends on how you use your OS. Generally, A high availability system needs this kind of panic. Otherwise, the panic will break downyou system. So you should enable panic for these scenarios accordingly.</p>
+<h2 id="3-The-necessary-knowledge-for-understanding-a-panic-in-code-level"><a href="#3-The-necessary-knowledge-for-understanding-a-panic-in-code-level" class="headerlink" title="3 The necessary knowledge for understanding a panic in code level"></a>3 The necessary knowledge for understanding a panic in code level<a id="ns_knowledge"></a></h2><ol>
+<li>Understand the principle of each panic type. Aware of why the kernel generates such a panic. Then you might get a chance to fix it.</li>
+<li>Aware of call convention on the CPU archs you work on. When disassembling a function, to understand how a variable is passed and operated, you need to know how registers are used in the platform you are working on.  For example, on the x86_64 the caller uses registers to pass the first 6 arguments to the callee. Given the arguments in left-to-right order, the order of registers used is: %rdi, %rsi, %rdx, %rcx, %r8, and %r9. Any remaining arguments are passed on the stack in reverse order so that they can be popped off the stack in order<a target="_blank" rel="noopener" href="http://6.s081.scripts.mit.edu/sp18/x86-64-architecture-guide.html#:~:text=Calling%20Convention&text=The%20caller%20uses%20registers%20to,off%20the%20stack%20in%20order.">[5]</a>.</li>
+<li>Aware of stack layout. To understand disassembly better, you need to know which bytes are used to save the prior %rpb value, return address, local variables, etc.</li>
+<li>You have to be familiar with the code style of kernel.</li>
+<li>Learn how to use crash tool, some useful subcommands like disassemble, kmem, list, etc.</li>
+</ol>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:<a id="reference"></a></h2><p>[1] <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kernel_panic">https://en.wikipedia.org/wiki/Kernel_panic</a><br>[2] <a target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/lockup-watchdogs.html">https://docs.kernel.org/admin-guide/lockup-watchdogs.html</a><br>[3] <a target="_blank" rel="noopener" href="https://access.redhat.com/solutions/6128111">https://access.redhat.com/solutions/6128111</a><br>[4] <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/RCU/stallwarn.txt">https://www.kernel.org/doc/Documentation/RCU/stallwarn.txt</a><br>[5] <a target="_blank" rel="noopener" href="http://6.s081.scripts.mit.edu/sp18/x86-64-architecture-guide.html#:~:text=Calling%20Convention&text=The%20caller%20uses%20registers%20to,off%20the%20stack%20in%20order">http://6.s081.scripts.mit.edu/sp18/x86-64-architecture-guide.html#:~:text=Calling%20Convention&amp;text=The%20caller%20uses%20registers%20to,off%20the%20stack%20in%20order</a>.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/10/About_me/" rel="prev" title="Welcome to my home page!">
+      <i class="fa fa-chevron-left"></i> Welcome to my home page!
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Table-of-contents"><span class="nav-number">1.</span> <span class="nav-text">Table of contents</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Introduction"><span class="nav-number">1.1.</span> <span class="nav-text">1 Introduction </span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#What-is-kernel-panic-and-why"><span class="nav-number">1.1.1.</span> <span class="nav-text">What is kernel panic and why?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-The-ypes-of-Kernel-Panic"><span class="nav-number">1.2.</span> <span class="nav-text">2 The ypes of Kernel Panic</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-NULL-pointer-dereference"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 NULL pointer dereference </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Unable-to-handle-page-fault"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 Unable to handle page fault </span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Hard-Soft-Lockup"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 Hard&#x2F;Soft Lockup</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#What-is-hard-lockup"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">What is hard lockup?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#What-is-soft-lockup"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">What is soft lockup?</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-Task-hang"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 Task hang</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-BUG-BUG-ON"><span class="nav-number">1.2.5.</span> <span class="nav-text">2.5 BUG&#x2F;BUG_ON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-Kernel-stack-overflow"><span class="nav-number">1.2.6.</span> <span class="nav-text">2.6 Kernel stack overflow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-RCU-stall"><span class="nav-number">1.2.7.</span> <span class="nav-text">2.7 RCU stall</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-8-double-fault"><span class="nav-number">1.2.8.</span> <span class="nav-text">2.8 double fault</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-The-necessary-knowledge-for-understanding-a-panic-in-code-level"><span class="nav-number">1.3.</span> <span class="nav-text">3 The necessary knowledge for understanding a panic in code level</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">1.4.</span> <span class="nav-text">Reference:</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Bruce Song</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Bruce Song</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
