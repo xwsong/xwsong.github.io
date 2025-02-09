@@ -145,6 +145,281 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/01/06/kernel/read_assembly_on_x86_64/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Bruce Song">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blogs For Linux Essential">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/01/06/kernel/read_assembly_on_x86_64/" class="post-title-link" itemprop="url">How to read assembly and stack data on x86_64</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-01-06 00:00:00" itemprop="dateCreated datePublished" datetime="2025-01-06T00:00:00+08:00">2025-01-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-02-09 22:02:38" itemprop="dateModified" datetime="2025-02-09T22:02:38+08:00">2025-02-09</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h2><p>1 <a href="#Why">Why need to read assembly?</a><br>2 <a href="#Essential">Essential Knowledge</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.1 <a href="#Instructions">The most used instructions</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.2 <a href="#Registers">x86_64 Registers</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.3 <a href="#Convention">Calling  Conventions</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.4 <a href="#AssemblySection">The most common sections of a function in terms of assembly</a><br>3 <a href="#Stack">Understand the data of stack by assembly</a><br>&nbsp;&nbsp;&nbsp;&nbsp;3.1 <a href="#StackLayout">Understand  the data layout of stack</a><br>&nbsp;&nbsp;&nbsp;&nbsp;3.2 <a href="#StackImage">A layout of stack generally looks like</a><br>&nbsp;&nbsp;&nbsp;&nbsp;3.3 <a href="#FrameData">One whole data layout of a frame</a><br>&nbsp;&nbsp;&nbsp;&nbsp;3.4 <a href="#StackAssembly">Understand the layout over assembly</a><br>&nbsp;&nbsp;&nbsp;&nbsp;3.5 <a href="#Purpose">The purpose of understanding stack layout</a><br>4 <a href="#Determine">Determine what the issue is</a><br>&nbsp;&nbsp;&nbsp;&nbsp;4.1 <a href="#SoftwareBug">Understand trap instruction</a><br>&nbsp;&nbsp;&nbsp;&nbsp;4.2 <a href="#Non-SoftwareBug">Not A Software Bug</a><br>&nbsp;&nbsp;&nbsp;&nbsp;4.3 <a href="#Deadlock">A Deadlock</a><br>5 <a href="#Reference">References</a></p>
+<h3 id="1-Why-need-to-read-assembly"><a href="#1-Why-need-to-read-assembly" class="headerlink" title="1 Why need to read assembly? "></a>1 Why need to read assembly? <a id="Why"></a></h3><ul>
+<li>Understand which data gets corrupted.</li>
+<li>Understand how a deadlock take places and how resources get involved.</li>
+<li>Understand if an issue is from App&#x2F;Kernel or hardware&#x2F;microcode or virtualization.</li>
+</ul>
+<h3 id="2-Essential-Knowledge"><a href="#2-Essential-Knowledge" class="headerlink" title="2 Essential Knowledge"></a>2 Essential Knowledge<a id="Essential"></a></h3><h4 id="2-1-The-most-used-instructions"><a href="#2-1-The-most-used-instructions" class="headerlink" title="2.1 The most used instructions "></a>2.1 The most used instructions <a id="Instructions"></a></h4><ul>
+<li><code>push/pop</code><br>Operate data on stack, <code>push</code> puts data on stack, which increases the stack size. <code>pop</code> gets data from stack, which decrease the stack size. The amount of push instructions reflects part size of stack.</li>
+<li><code>mov</code><br>Move data from the source of register&#x2F;memory to the destination of register&#x2F;memory</li>
+<li><code>test</code><br>Determine if a value is 0 or not. If the result is <code>0</code>, the <code>ZF</code> is set to <code>1</code>, otherwise set to <code>0</code>.  In general, there is a jump instruction following <code>test</code> instruction. By checking <code>ZF</code> flags to confirm if jump to another position.</li>
+<li><code>jz/jnz/je/jne</code><br>In general, it follows a test or a cmp command. For <code>jz/je</code>, if <code>ZF</code> is 1, then jump, for <code>jnz/jne</code>, if <code>ZF</code> is 0, then jump.</li>
+<li><code>cmp</code><br>The comparison is performed by subtracting the second operand from the first operand and then setting the status flags in the same manner as the <code>sub</code> instruction. Like <code>test</code> , followed by a jump instruction.</li>
+<li><code>jmp</code><br>An unconditional jump instruction</li>
+<li><code>call</code><br>Call a real function with prepared arguments. We can check how the dataflow is by the arguments passed to the function that <code>call</code> is running for. Put the return address of caller, which increases the stack size silently.</li>
+<li><code>ret</code><br>Return from callee to caller. Pop up return address.</li>
+</ul>
+<h4 id="2-2-x86-64-Registers"><a href="#2-2-x86-64-Registers" class="headerlink" title="2.2 x86_64 Registers "></a>2.2 x86_64 Registers <a id="Registers"></a></h4><p>The usage of registers</p>
+<table>
+<thead>
+<tr>
+<th>Register</th>
+<th>Usage</th>
+<th>Saved across calls</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>%rax</td>
+<td>Temporary register; return first 8 bytes after function call</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%rbx</td>
+<td>Callee-saved register, used to save temporary data</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>%rcx</td>
+<td>Used to pass the forth argument to functions(not for syscall)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%rdx</td>
+<td>Used to pass the third parameter to functions</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%rbp</td>
+<td>Optionally used to save the pointer of frame bottom for stack; callee-saved register</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>%rsp</td>
+<td>Stack pointer, always point to the top of stack</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>%rdi</td>
+<td>Used to pass the first argument to functions.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%rsi</td>
+<td>Used to pass the second argument to functions.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%r8</td>
+<td>Used to pass the fifth argument to functions.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%r9</td>
+<td>Used to pass the sixth argument to functions.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%r10</td>
+<td>Temporary register; used to pass the forth argument to syscall.</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%r11</td>
+<td>Temporary register</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%r12-%r15</td>
+<td>Callee-saved register.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>%rip</td>
+<td>Used to save the address of current instruction</td>
+<td>No</td>
+</tr>
+<tr>
+<td>%gs</td>
+<td>Used to save percpu data pointer inside of linux kernel.</td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="2-3-Calling-Conventions"><a href="#2-3-Calling-Conventions" class="headerlink" title="2.3 Calling  Conventions "></a>2.3 Calling  Conventions <a id="Convention"></a></h4><p>In x86_64(or AMD64), there are 6 registers used to pass arguments during a function call, which are %rdi, rsi%, rdx%, rcx%, r8% and r9% for both user and kernel space(Not for syscall, which uses r10% to pass the 4th argument).  See the details in <a href="#Registers">x86_64 registers</a> section.</p>
+<h4 id="2-4-The-most-common-sections-of-a-function-in-terms-of-assembly"><a href="#2-4-The-most-common-sections-of-a-function-in-terms-of-assembly" class="headerlink" title="2.4 The most common sections of a function in terms of assembly "></a>2.4 The most common sections of a function in terms of assembly <a id="AssemblySection"></a></h4><ul>
+<li><p>The entrance of a function </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]</span><br><span class="line">&lt;migrate_swap+5&gt;:    push   %r14</span><br><span class="line">&lt;migrate_swap+7&gt;:    mov    %rsi,%r14</span><br><span class="line">&lt;migrate_swap+10&gt;:   push   %r13</span><br><span class="line">&lt;migrate_swap+12&gt;:   mov    %rdi,%r13</span><br><span class="line">&lt;migrate_swap+15&gt;:   push   %r12</span><br><span class="line">&lt;migrate_swap+17&gt;:   mov    %edx,%r12d</span><br><span class="line">&lt;migrate_swap+20&gt;:   push   %rbp</span><br><span class="line">&lt;migrate_swap+21&gt;:   mov    %ecx,%ebp</span><br><span class="line">&lt;migrate_swap+23&gt;:   push   %rbx</span><br><span class="line">&lt;migrate_swap+24&gt;:   sub    $0x18,%rsp</span><br></pre></td></tr></table></figure>
+<p>As we can see, the entrance of a function almost to operate stack, <code>push</code> instruction to save prior the values of some registers. And <code>sub</code> instruction is used to preserve stack space for local variables.</p>
+</li>
+<li><p>The exit of a function</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+259&gt;:  add    $0x18,%rsp</span><br><span class="line">&lt;migrate_swap+263&gt;:  mov    $0xffffffea,%eax</span><br><span class="line">&lt;migrate_swap+268&gt;:  pop    %rbx</span><br><span class="line">&lt;migrate_swap+269&gt;:  pop    %rbp</span><br><span class="line">&lt;migrate_swap+270&gt;:  pop    %r12</span><br><span class="line">&lt;migrate_swap+272&gt;:  pop    %r13</span><br><span class="line">&lt;migrate_swap+274&gt;:  pop    %r14</span><br><span class="line">&lt;migrate_swap+276&gt;:  ret</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>The <code>add</code> instruction corresponds to the <code>sub</code> instruction that adds 0x18 for %rsp. Then <code>pop</code> instructions corresponds to all <code>push</code> of the entrance. <code>%eax</code> is used to pass return value. Last <code>ret</code> instruction returns to the caller.</p>
+<ul>
+<li>Call another function<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+140&gt;:  mov    %r12d,%edi</span><br><span class="line">&lt;migrate_swap+143&gt;:  mov    %ebp,%esi</span><br><span class="line">&lt;migrate_swap+145&gt;:  mov    %rsp,%rcx</span><br><span class="line">&lt;migrate_swap+148&gt;:  mov    $0xffffffff830ba690,%rdx</span><br><span class="line">&lt;migrate_swap+155&gt;:  call   0xffffffff8313d9f0 &lt;stop_two_cpus&gt;</span><br></pre></td></tr></table></figure>
+As we mentioned in the  <a href="#Convention">Calling Conventions</a> section, <code>%rdi</code> for the 1st argument, <code>%rsi</code> for the 2nd argument, <code>%rdx</code> for the 3rd argument and <code>%rcx</code> for the 4th argument. Here <code>%edi</code> and <code>%esi</code> are for passing 32-bit arguments. Then <code>call</code> instruction jumps to <code>stop_two_cpus()</code> and it will read these arguments over call convention.</li>
+</ul>
+<p>The prototype of stop_two_cpus():</p>
+<pre><code>int stop_two_cpus(unsigned int cpu1, unsigned int cpu2, cpu_stop_fn_t fn, void *arg);
+</code></pre>
+<ul>
+<li>Read&#x2F;Write data from stack<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+30&gt;:   mov    %rdi,(%rsp)</span><br><span class="line">&lt;migrate_swap+34&gt;:   mov    %rsi,0x8(%rsp)</span><br><span class="line">&lt;migrate_swap+39&gt;:   mov    %ecx,0x10(%rsp)</span><br><span class="line">&lt;migrate_swap+43&gt;:   mov    %edx,0x14(%rsp)</span><br><span class="line">...</span><br><span class="line">&lt;migrate_swap+249&gt;:  mov    0x10(%rsp),%esi</span><br><span class="line">&lt;migrate_swap+253&gt;:  mov    0x14(%rsp),%edi</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>As we can see, Reading and writing data from stack, the value of %rsp is used as the base address of memory, then add an offset to it. </p>
+<p>Here notice that the part of stack space is used to save arguments passed from the caller, so stack space sometimes is used for temporary purpose rather than local variable, we will do the further analysis in the section <a href="#StackLayout">Understand  the data layout on stack</a>. For more details, refer to <a target="_blank" rel="noopener" href="https://gitlab.com/x86-psABIs/x86-64-ABI/-/jobs/artifacts/master/raw/x86-64-ABI/abi.pdf?job=build">[4]</a> “A.2.1 Calling Conventions”.</p>
+<h3 id="3-Understand-the-data-of-stack-by-assembly"><a href="#3-Understand-the-data-of-stack-by-assembly" class="headerlink" title="3 Understand the data of stack by assembly "></a>3 Understand the data of stack by assembly <a id="Stack"></a></h3><ul>
+<li>Accessing memory to trigger a memory issue</li>
+<li>No memory accessed</li>
+</ul>
+<h3 id="3-1-Understand-the-data-layout-of-stack"><a href="#3-1-Understand-the-data-layout-of-stack" class="headerlink" title="3.1 Understand  the data layout of stack  "></a>3.1 Understand  the data layout of stack  <a id="StackLayout"></a></h3><p>To understand all hex data in a function frame of a stack, basically, we need to understand all stack operations of a function in terms of assembly, and match the code and assembly to understand how data gets passed right before a panic triggered. First of all, let’s start with a diagram.</p>
+<h4 id="3-2-A-layout-of-stack-generally-looks-like"><a href="#3-2-A-layout-of-stack-generally-looks-like" class="headerlink" title="3.2 A layout of stack generally looks like "></a>3.2 A layout of stack generally looks like <a id="StackImage"></a></h4><p><img src="/home/brucesong/workspace/linux-pie/source/image/stack_layout.png" alt="image" title="StackLayout"><br>Notice that only “return address” must have, the rest of stack data are optional. It depends on the implementation or size or how the compiler optimizes the function. You need to analyze the assembly of the function and frame data to understand what the stack data consists of, which will be explained below.</p>
+<h4 id="3-3-One-whole-data-layout-of-a-frame"><a href="#3-3-One-whole-data-layout-of-a-frame" class="headerlink" title="3.3 One whole data layout of a frame "></a>3.3 One whole data layout of a frame <a id="FrameData"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#14 [ffffada72f79bcc8] migrate_swap at ffffffff830bad90</span><br><span class="line">    ffffada72f79bcd0: ffff8ddbf3590ec0 ffff8deaf1fe5440</span><br><span class="line">    ffffada72f79bce0: 0000002a00000010 ffff8ddbf3590ec0</span><br><span class="line">    ffffada72f79bcf0: ffff8e016b023200 0000000000000015</span><br><span class="line">    ffffada72f79bd00: ffffada72f79bd70 0000000000000000</span><br><span class="line">    ffffada72f79bd10: ffffffff830c8e8c</span><br><span class="line">#15 [ffffada72f79bd10] task_numa_fault at ffffffff830c8e8c</span><br></pre></td></tr></table></figure>
+<h4 id="3-4-Understand-the-layout-over-assembly"><a href="#3-4-Understand-the-layout-over-assembly" class="headerlink" title="3.4 Understand the layout over assembly "></a>3.4 Understand the layout over assembly <a id="StackAssembly"></a></h4><p>Construct stack space:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+5&gt;:    push   %r14</span><br><span class="line">&lt;migrate_swap+7&gt;:    mov    %rsi,%r14</span><br><span class="line">&lt;migrate_swap+10&gt;:   push   %r13</span><br><span class="line">&lt;migrate_swap+12&gt;:   mov    %rdi,%r13</span><br><span class="line">&lt;migrate_swap+15&gt;:   push   %r12</span><br><span class="line">&lt;migrate_swap+17&gt;:   mov    %edx,%r12d</span><br><span class="line">&lt;migrate_swap+20&gt;:   push   %rbp</span><br><span class="line">&lt;migrate_swap+21&gt;:   mov    %ecx,%ebp</span><br><span class="line">&lt;migrate_swap+23&gt;:   push   %rbx</span><br><span class="line">&lt;migrate_swap+24&gt;:   sub    $0x18,%rsp</span><br></pre></td></tr></table></figure>
+<p>The frame consists of 8 bytes return address, 5 <code>push</code> instructions, which take 5*8 &#x3D; 40 bytes, and extra 40 bytes(0x18) by <code>sub</code> instruction. So the total amount is 8 + 40 +40 &#x3D; 88 bytes, which is equal to the amount of bytes of frame #14.</p>
+<p>Then the return address is stored in 0xffffada72f79bd10.  <code>%r14</code> is stored in 0xffffada72f79bd08, <code>%r13</code> is stored in 0xffffada72f79bd00, utill <code>push %rbx</code>.</p>
+<p>To understand the data from 0xffffada72f79bcd0 to 0xffffada72f79bce0, we need to check the operations of %rsp in assembly level  of  migrate_swap(). In this function, there are 4 write operations,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+30&gt;:   mov    %rdi,(%rsp)</span><br><span class="line">&lt;migrate_swap+34&gt;:   mov    %rsi,0x8(%rsp)</span><br><span class="line">&lt;migrate_swap+39&gt;:   mov    %ecx,0x10(%rsp)</span><br><span class="line">&lt;migrate_swap+43&gt;:   mov    %edx,0x14(%rsp)</span><br></pre></td></tr></table></figure>
+<p>As we can see,  the first 8 bytes is used to store the value of %rdi in ffffada72f79bcd0, which is the first arguments passed by caller. The second 8 bytes is used to store the value of %rsi which is the second arguments passed by caller. Then 4 bytes is for  the value of %ecx, the rest is for %edx. So the we have known every single byte in this frame and the whole view looks like:</p>
+<table>
+<thead>
+<tr>
+<th>Address</th>
+<th>Data</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ffffada72f79bcd0</td>
+<td>ffff8ddbf3590ec0</td>
+<td>The 1st argument from caller</td>
+</tr>
+<tr>
+<td>ffffada72f79bcd8</td>
+<td>ffff8deaf1fe5440</td>
+<td>The 2nd argument from caller</td>
+</tr>
+<tr>
+<td>ffffada72f79bce0</td>
+<td>00000010</td>
+<td>The 4th argument from caller</td>
+</tr>
+<tr>
+<td>ffffada72f79bce4</td>
+<td>0000002a</td>
+<td>the 3rd argument from caller</td>
+</tr>
+<tr>
+<td>ffffada72f79bce8</td>
+<td>ffff8ddbf3590ec0</td>
+<td>The prior value of %rbx</td>
+</tr>
+<tr>
+<td>ffffada72f79bcf0</td>
+<td>ffff8e016b023200</td>
+<td>The prior value of %rbp</td>
+</tr>
+<tr>
+<td>ffffada72f79bcf8</td>
+<td>0000000000000015</td>
+<td>The prior value of %r12</td>
+</tr>
+<tr>
+<td>ffffada72f79bd00</td>
+<td>ffffada72f79bd70</td>
+<td>The prior value of %r13</td>
+</tr>
+<tr>
+<td>ffffada72f79bd08</td>
+<td>0000000000000000</td>
+<td>The prior value of %r14</td>
+</tr>
+<tr>
+<td>ffffada72f79bd10</td>
+<td>ffffffff830c8e8c</td>
+<td>Return address of caller</td>
+</tr>
+</tbody></table>
+<p>Then we see the C code:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">migrate_swap</span><span class="params">(<span class="keyword">struct</span> task_struct *cur, <span class="keyword">struct</span> task_struct *p,</span></span><br><span class="line"><span class="params">                <span class="type">int</span> target_cpu, <span class="type">int</span> curr_cpu)</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">migration_swap_arg</span> <span class="title">arg</span>;</span></span><br><span class="line">        <span class="type">int</span> ret = -EINVAL;</span><br><span class="line"></span><br><span class="line">        arg = (<span class="keyword">struct</span> migration_swap_arg)&#123;</span><br><span class="line">                .src_task = cur, <span class="comment">/* The value of %rdi, 1st argument */</span></span><br><span class="line">                .src_cpu = curr_cpu,<span class="comment">/* The value of %edx, the 3rd argument */</span></span><br><span class="line">                .dst_task = p, <span class="comment">/* The value of %rsi, the 2nd argument */</span></span><br><span class="line">                .dst_cpu = target_cpu, <span class="comment">/* the value of %ecx, the 4th argument */</span></span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (arg.src_cpu == arg.dst_cpu)</span><br><span class="line">                <span class="keyword">goto</span> out;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The 4 <code>mov</code> instructions is to construct the local <code>arg</code>instance. Notice that stack space is not always store local variable, Here the variable <code>ret</code> actually is not store to anywhere, the return value is moved to <code>%rax</code> directly by the assembly below:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;migrate_swap+263&gt;:  mov    $0xffffffea,%eax</span><br></pre></td></tr></table></figure>
+<h4 id="3-5-The-purpose-of-understanding-stack-layout"><a href="#3-5-The-purpose-of-understanding-stack-layout" class="headerlink" title="3.5 The purpose of understanding stack layout "></a>3.5 The purpose of understanding stack layout <a id="Purpose"></a></h4><p>To learn how the dataflow is in a calltrace or where the data gets corrupted, the stack data commonly help a lot with where the problem is from.</p>
+<h3 id="4-Determine-what-the-issue-is"><a href="#4-Determine-what-the-issue-is" class="headerlink" title="4 Determine what the issue is "></a>4 Determine what the issue is <a id="Determine"></a></h3><h4 id="4-1-Understand-trap-instruction"><a href="#4-1-Understand-trap-instruction" class="headerlink" title="4.1 Understand  trap instruction "></a>4.1 Understand  trap instruction <a id="SoftwareBug"></a></h4><p>Generally, a software bug is easily to be triggered by accessing an illegal address of data. For example, there is a structure pointer stored in <code>%rax</code>, then reading a member of the structure looks like:</p>
+<pre><code>mov 0x10(%rax), %rbx
+</code></pre>
+<p>while for a NULL pointer dereference, <code>%rax</code> would have a value 0x00000000, which can trigger a panic with address  0x00000010. Here we need to find out where the NULL value of <code>%rax</code> is from or how the pointer is passed here, the pointer might be from a local variable, a pointer from function argument or from a return value of another function, etc. So we need to know what data is getting corrupted or released.  use after free, overwritten.</p>
+<p>Sometimes, an unmeaningful address that looks not for user or kernel space is called non-canonical address, it might be the relevant page gets overwritten or  access a uninitialized pointer.</p>
+<h4 id="4-2-Not-A-Software-Bug"><a href="#4-2-Not-A-Software-Bug" class="headerlink" title="4.2 Not A Software Bug "></a>4.2 Not A Software Bug <a id="Non-SoftwareBug"></a></h4><p>If the trap instruction is not accessing a memory address but the kernel reports a memory issue, generally a page fault generated, be careful, the issue might be from hardware or microcode bug or hypervisor rather than software.</p>
+<p>You can run memtest86+ to confirm if there is something wrong with hardware or not.</p>
+<h4 id="4-3-A-Deadlock"><a href="#4-3-A-Deadlock" class="headerlink" title="4.3 A Deadlock "></a>4.3 A Deadlock <a id="Deadlock"></a></h4><p>For a deadlock issue, you need to check why the lock request doesn’t get responded, which context is owning the requested lock and why the context has held the lock so long.</p>
+<p>Mutual waiting resources, in spinlock critical section, that would be a hard lockup, because spinlock hold is under preemption and interrupt disabled. If an IO resource could get released, it would be a ‘D’ state issue with processes. If there is a loop with spin_lock&#x2F;spin_unlock pair inside of it, it would be a soft lockup.</p>
+<h3 id="5-References"><a href="#5-References" class="headerlink" title="5 References "></a>5 References <a id="Reference"></a></h3><p>[1]<a target="_blank" rel="noopener" href="http://6.s081.scripts.mit.edu/sp18/x86-64-architecture-guide.html#:~:text=Calling%20Convention&text=The%20caller%20uses%20registers%20to,off%20the%20stack%20in%20order">http://6.s081.scripts.mit.edu/sp18/x86-64-architecture-guide.html#:~:text=Calling%20Convention&amp;text=The%20caller%20uses%20registers%20to,off%20the%20stack%20in%20order</a>.<br>[2]<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/TEST_(x86_instruction)">https://en.wikipedia.org/wiki/TEST_(x86_instruction)</a><br>[3]<a target="_blank" rel="noopener" href="https://c9x.me/x86/html/file_module_x86_id_35.html">https://c9x.me/x86/html/file_module_x86_id_35.html</a><br>[4]<a target="_blank" rel="noopener" href="https://gitlab.com/x86-psABIs/x86-64-ABI/-/jobs/artifacts/master/raw/x86-64-ABI/abi.pdf?job=build">https://gitlab.com/x86-psABIs/x86-64-ABI/-/jobs/artifacts/master/raw/x86-64-ABI/abi.pdf?job=build</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/10/kernel/kernel_panic_types/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -339,7 +614,7 @@
       
           <h2 id="Who-am-I"><a href="#Who-am-I" class="headerlink" title="Who am I?"></a>Who am I?</h2><p>I am a linux hacker who has been working on linux over 10 years. I still have massive passion with linux.</p>
 <h2 id="What’s-the-purpose"><a href="#What’s-the-purpose" class="headerlink" title="What’s the purpose?"></a>What’s the purpose?</h2><p>This blog site is used to note linux related content that I’m familiar with like linux kernel, some of common linux tools, c language, shell, etc. I try to share some of my experience about how to do some specific things that is able to improve my work efficiency on linux.</p>
-<h2 id="How-to-contact-me"><a href="#How-to-contact-me" class="headerlink" title="How to contact me?"></a>How to contact me?</h2><p>Please email me with <a href="mailto:&#x73;&#120;&#x77;&#98;&#x72;&#117;&#99;&#101;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;">&#x73;&#120;&#x77;&#98;&#x72;&#117;&#99;&#101;&#64;&#x67;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></p>
+<h2 id="How-to-contact-me"><a href="#How-to-contact-me" class="headerlink" title="How to contact me?"></a>How to contact me?</h2><p>Please email me with <a href="mailto:&#115;&#x78;&#119;&#98;&#x72;&#117;&#x63;&#x65;&#x40;&#103;&#109;&#x61;&#x69;&#x6c;&#46;&#99;&#x6f;&#109;">&#115;&#x78;&#119;&#98;&#x72;&#117;&#x63;&#x65;&#x40;&#103;&#109;&#x61;&#x69;&#x6c;&#46;&#99;&#x6f;&#109;</a></p>
 
       
     </div>
@@ -421,7 +696,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -449,7 +724,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
