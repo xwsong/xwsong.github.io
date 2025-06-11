@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Keep Team">
+    
+    <title>
+        
+            Understand Linux kernel Oops/Panic |
+        
+        Keep Theme
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/logo.svg">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"en"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#0066cc","title":"Keep Theme","author":"Keep Team","avatar":"/images/avatar.svg","logo":"/images/logo.svg","favicon":"/images/logo.svg"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":false,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":false,"percent":false,"hide_header":true},"home":{"announcement":null,"category":false,"tag":false,"post_datetime":"updated"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2020,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"}
+    KEEP.language_code_block = {"copy":"Copy code","copied":"Copied","fold":"Fold code block","folded":"Folded"}
+    KEEP.language_copy_copyright = {"copy":"Copy copyright info","copied":"Copied","title":"Original post title","author":"Original post author","link":"Original post link"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/logo.svg">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               Keep Theme
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                HOME
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                ARCHIVES
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            HOME
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            ARCHIVES
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Understand Linux kernel Oops/Panic
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.svg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Xiongwei Song &lt;sxwbruce@gmail.com&gt;</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-01-06 00:00:00</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed Jun 11 2025 11:21:06 GMT+0800">2025-06-11 11:21:06</span>
+                </span>
+            
+        
+
+        
+
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h2><p>1 <a href="#Example">A Real Example</a><br>2 <a href="#UnderstandeverypartsofOopsPanic">Understand every parts of Oops&#x2F;Panic</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.1 <a href="#OopsType">Oops Type</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.2 <a href="#PageFaultContext">Page Fault Context</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.3 <a href="#PageTableInfo">Page Table Info</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.4 <a href="#OopsCode">Oops Code</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.4.1 <a href="#OopsCounter">Oops Counter</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.4.2 <a href="#Importantkernelconfigoptions">Important kernel config options</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.5 <a href="#BasicInfo">Basic Info</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.5.1 <a href="#Taintedkernel">Tainted kernel</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.6 <a href="#OopsSpot">Oops Spot</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.7 <a href="#CodeHex">Code Hex</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.8 <a href="#x86_64Registers">x86_64 Registers</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.9 <a href="#CallTrace">Call trace</a><br><a href="#References">References</a></p>
+<h3 id="1-A-Real-Example"><a href="#1-A-Real-Example" class="headerlink" title="1 A Real Example "></a>1 A Real Example <a id="Example"></a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">[   <span class="number">20.656398</span>] BUG: kernel <span class="literal">NULL</span> pointer dereference, address: <span class="number">0000000000000018</span></span><br><span class="line">[   <span class="number">20.656834</span>] #PF: supervisor read access in kernel mode</span><br><span class="line">[   <span class="number">20.657042</span>] #PF: error_code(<span class="number">0x0000</span>) - not-present page</span><br><span class="line">[   <span class="number">20.657250</span>] PGD <span class="number">0</span> P4D <span class="number">0</span> </span><br><span class="line">[   <span class="number">20.657358</span>] Oops: <span class="number">0000</span> [#<span class="number">1</span>] PREEMPT SMP NOPTI</span><br><span class="line">[   <span class="number">20.657536</span>] CPU: <span class="number">0</span> PID: <span class="number">51</span> Comm: kworker/u2:<span class="number">3</span> Not tainted <span class="number">6.5</span><span class="number">.0</span>+ #<span class="number">5</span></span><br><span class="line">[   <span class="number">20.657790</span>] Hardware name: QEMU Standard <span class="title function_">PC</span> <span class="params">(i440FX + PIIX, <span class="number">1996</span>)</span>, BIOS 1.15.0-1 04/01/2014</span><br><span class="line">[   20.658120] Workqueue: kacpi_hotplug acpi_hotplug_work_fn</span><br><span class="line">[   20.658389] RIP: 0010:pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.658654] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br><span class="line">[   20.659383] RSP: 0018:ffffc1dc405cbcc8 EFLAGS: 00010282</span><br><span class="line">[   20.659635] RAX: 7b171119e4e9aa00 RBX: ffffc1dc405cbce0 RCX: 0000000000000001</span><br><span class="line">[   20.660039] RDX: 0000000000000000 RSI: ffffc1dc405cbcd0 RDI: 0000000000000000</span><br><span class="line">[   20.660325] RBP: ffffc1dc405cbd20 R08: 0000000000000000 R09: 0000000000000000</span><br><span class="line">[   20.660612] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000000000000</span><br><span class="line">[   20.660956] R13: ffffc1dc405cbcd0 R14: ffffa07581a9e828 R15: 0000000000000000</span><br><span class="line">[   20.661250] FS:  0000000000000000<span class="params">(<span class="number">0000</span>)</span> GS:<span class="title function_">ffffa075bfc00000</span><span class="params">(<span class="number">0000</span>)</span> knlGS:0000000000000000</span><br><span class="line">[   20.661581] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033</span><br><span class="line">[   20.661821] CR2: 0000000000000018 CR3: 00000000027fa006 CR4: 0000000000770ef0</span><br><span class="line">[   20.662114] PKRU: 55555554</span><br><span class="line">[   20.662234] Call Trace:</span><br><span class="line">[   20.662415]  &lt;TASK&gt;</span><br><span class="line">[   20.662509]  ? show_regs+0x72/0x90</span><br><span class="line">[   20.662698]  ? __die+0x25/0x80</span><br><span class="line">[   20.662826]  ? page_fault_oops+0x154/0x4c0</span><br><span class="line">[   20.662994]  ? __pfx_acpi_dev_for_one_check+0x10/0x10</span><br><span class="line">[   20.663200]  ? device_for_each_child+0x6f/0xa0</span><br><span class="line">[   20.663381]  ? do_user_addr_fault+0x330/0x6e0</span><br><span class="line">[   20.663563]  ? exc_page_fault+0x84/0x1b0</span><br><span class="line">[   20.663726]  ? asm_exc_page_fault+0x27/0x30</span><br><span class="line">[   20.663900]  ? pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.664145]  enable_slot+0x233/0x460</span><br><span class="line">[   20.664294]  ? trim_stale_devices+0x10b/0x180</span><br><span class="line">[   20.664473]  ? get_slot_status+0xa2/0x110</span><br><span class="line">[   20.664640]  acpiphp_check_bridge.part.0+0x127/0x150</span><br><span class="line">[   20.664843]  acpiphp_hotplug_notify+0x24f/0x2d0</span><br><span class="line">[   20.665029]  ? __pfx_acpiphp_hotplug_notify+0x10/0x10</span><br><span class="line">[   20.665236]  acpi_device_hotplug+0xc7/0x540</span><br><span class="line">[   20.665409]  acpi_hotplug_work_fn+0x22/0x40</span><br><span class="line">[   20.665580]  process_one_work+0x178/0x360</span><br><span class="line">[   20.665748]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.665923]  worker_thread+0x307/0x430</span><br><span class="line">[   20.666079]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.666260]  kthread+0xf4/0x130</span><br><span class="line">[   20.666396]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666552]  ret_from_fork+0x43/0x70</span><br><span class="line">[   20.666701]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666860]  ret_from_fork_asm+0x1b/0x30</span><br><span class="line">[   20.667022]  &lt;/TASK&gt;</span><br><span class="line">[   20.667116] Modules linked in:</span><br><span class="line">[   20.667251] CR2: 0000000000000018</span><br><span class="line">[   20.667390] ---[ end trace 0000000000000000 ]---</span><br><span class="line">[... snip ...]</span><br><span class="line">[   20.671194] Kernel panic - not syncing: Fatal exception</span><br><span class="line">[   20.671579] Kernel Offset: 0x30200000 from 0<span class="title function_">xffffffff81000000</span> <span class="params">(relocation range: <span class="number">0xffffffff80000000</span><span class="number">-0xffffffffbfffffff</span>)</span></span><br><span class="line">[   20.672007] ---[ end Kernel panic - not syncing: Fatal exception ]---</span><br></pre></td></tr></table></figure>
+<h3 id="2-Understand-every-parts-of-Oops-Panic"><a href="#2-Understand-every-parts-of-Oops-Panic" class="headerlink" title="2 Understand every parts of Oops&#x2F;Panic "></a>2 Understand every parts of Oops&#x2F;Panic <a id="UnderstandeverypartsofOopsPanic"></a></h3><h4 id="2-1-Oops-Type"><a href="#2-1-Oops-Type" class="headerlink" title="2.1 Oops Type "></a>2.1 Oops Type <a id="OopsType"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.656398] BUG: kernel NULL pointer dereference, address: 0000000000000018</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-Page-Fault-Context"><a href="#2-2-Page-Fault-Context" class="headerlink" title="2.2 Page Fault Context "></a>2.2 Page Fault Context <a id="PageFaultContext"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[   20.656834] #PF: supervisor read access in kernel mode</span><br><span class="line">[   20.657042] #PF: error_code(0x0000) - not-present page</span><br></pre></td></tr></table></figure>
+<p>The  error_code(0x0000) contains the context of the page fault. For the error code format, see the following figure <a href="#%5B7%5D">[7]</a>:<br><img   src="https://github.com/xwsong/xwsong.github.io/blob/main/images/page_fault_error_code.png?raw=true"  alt="Interrupt 14—Page-Fault Exception (#PF) Intel® 64 and IA-32 Architectures Software Developer’s Manual Volume 3" title="#PF Error Code"></p>
+<h4 id="2-3-Page-Table-Info"><a href="#2-3-Page-Table-Info" class="headerlink" title="2.3 Page Table Info "></a>2.3 Page Table Info <a id="PageTableInfo"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.657250] PGD 0 P4D 0 </span><br></pre></td></tr></table></figure>
+<p>PGD is 0, which shows us the page global directory entry is present in memory, P4D is the same.</p>
+<h4 id="2-4-Oops-Code"><a href="#2-4-Oops-Code" class="headerlink" title="2.4 Oops Code "></a>2.4 Oops Code <a id="OopsCode"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.657358] Oops: 0000 [#1] PREEMPT SMP NOPTI</span><br></pre></td></tr></table></figure>
+<p>This is the error code value in hex. Each bit has a significance of its own <a href="#%5B1%5D">[1]</a>:</p>
+<ul>
+<li><code>bit 0</code>  &#x3D;&#x3D; 0 means no page found, 1 means General Protection Fault</li>
+<li><code>bit 1</code>  &#x3D;&#x3D; 0 means read, 1 means write</li>
+<li><code>bit 2</code>  &#x3D;&#x3D; 0 means kernel, 1 means user-mode</li>
+</ul>
+<h5 id="2-4-1-Oops-Counter"><a href="#2-4-1-Oops-Counter" class="headerlink" title="2.4.1 Oops Counter "></a>2.4.1 Oops Counter <a id="OopsCounter"></a></h5><ul>
+<li><code>[#1]</code>  — this value is the number of times the Oops occurred. Multiple Oops can be triggered as a cascading effect of the first one.</li>
+</ul>
+<h5 id="2-4-2-Important-kernel-config-options"><a href="#2-4-2-Important-kernel-config-options" class="headerlink" title="2.4.2 Important kernel config options "></a>2.4.2 Important kernel config options <a id="Importantkernelconfigoptions"></a></h5><p>“PREEMPT SMP NOPTI”  means CONFIG_PREEMPTION and CONFIG_SMP are enabled, X86_FEATURE_PTI is disabled.</p>
+<h4 id="2-5-Basic-Info"><a href="#2-5-Basic-Info" class="headerlink" title="2.5 Basic Info "></a>2.5 Basic Info <a id="BasicInfo"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.657536] CPU: 0 PID: 51 Comm: kworker/u2:3 Not tainted 6.5.0+ #5</span><br></pre></td></tr></table></figure>
+<p>The relevant CPU number, process info, tainted status, kernel version, tainted or not.</p>
+<h5 id="2-5-1-Tainted-kernel"><a href="#2-5-1-Tainted-kernel" class="headerlink" title="2.5.1 Tainted kernel "></a>2.5.1 Tainted kernel <a id="Taintedkernel"></a></h5><p>The the following content is form  the Linux Kernel Official <a href="#%5B3%5D">[3]</a></p>
+<blockquote>
+<p>The kernel will mark itself as ‘tainted’ when something occurs that<br>might be relevant later when investigating problems. Don’t worry too<br>much about this, most of the time it’s not a problem to run a tainted<br>kernel; the information is mainly of interest once someone wants to<br>investigate some problem, as its real cause might be the event that<br>got the kernel tainted. That’s why bug reports from tainted kernels<br>will often be ignored by developers, hence try to reproduce problems<br>with an untainted kernel.</p>
+<p>Note the kernel will remain tainted even after you undo what caused<br>the taint (i.e. unload a proprietary kernel module), to indicate the<br>kernel remains not trustworthy. That’s also why the kernel will print<br>the tainted state when it notices an internal problem (a ‘kernel<br>bug’), a recoverable error (‘kernel oops’) or a non-recoverable error<br>(‘kernel panic’) and writes debug information about this to the logs<br><code>dmesg</code>  outputs. It’s also possible to check the tainted state at<br>runtime through a file in  <code>/proc/</code>.</p>
+</blockquote>
+<p>| Bit  | Log  | Number | Reason that got the kernel tainted<br>|–|–|–|–|–|<br>| 0 | G&#x2F;P | 1 | proprietary module was loaded |<br>| 1 | F | 2 | module was force loaded |<br>| 2 | S | 4 | kernel running on an out of specification system |<br>| 3 | R | 8 | module was force unloaded<br>| 4 | M | 16 | processor reported a Machine Check Exception (MCE)<br>| 5 | B | 32 | bad page referenced or some unexpected page flags<br>| 6 | U | 64 | taint requested by userspace application<br>| 7 | D | 128 | kernel died recently, i.e. there was an OOPS or BUG<br>| 8 | A | 256 | ACPI table overridden by user<br>| 9 | W | 512 | kernel issued warning<br>| 10 | C | 1024 | staging driver was loaded<br>| 11 | I | 2048 | workaround for bug in platform firmware applied<br>| 12 | O | 4096 | externally-built (“out-of-tree”) module was loaded<br>| 13 | E | 8192 | unsigned module was loaded<br>| 14 | L | 16384 | soft lockup occurred<br>| 15 | K | 32768 | kernel has been live patched<br>| 16 | X | 65536 | auxiliary taint, defined for and used by distros<br>| 17 | T | 131072 | kernel was built with the struct randomization plugin<br>| 18 | N | 262144 | an in-kernel test has been run<br>| 19 | J | 524288 | userspace used a mutating debug operation in fwctl</p>
+<h4 id="2-6-Oops-Spot"><a href="#2-6-Oops-Spot" class="headerlink" title="2.6 Oops Spot "></a>2.6 Oops Spot <a id="OopsSpot"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.658389] RIP: 0010:pci_assign_unassigned_bridge_resources+0x31/0x270</span><br></pre></td></tr></table></figure>
+<p>The program stopped at the offset 0x31 of pci_assign_unassigned_bridge_resources, 0x270 is the all bytes of pci_assign_unassigned_bridge_resources instructions. 0010 is the CS value,  will explain it in Section Registers.</p>
+<h4 id="2-7-Code-Hex"><a href="#2-7-Code-Hex" class="headerlink" title="2.7 Code Hex "></a>2.7 Code Hex <a id="CodeHex"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.658654] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br></pre></td></tr></table></figure>
+<p>A bunch of instructions around the RIP <a href="#%5B5%5D">[5]</a>. Pass the oops info to .&#x2F;scripts&#x2F;decodecode that is from kernel source tree, then you will get the disassemble of around trap instruction.  This may help you when no vmcore.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">./scripts/decodecode &lt; ~/workspace/null_dereference_panic</span><br><span class="line">[ 20.667842] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br><span class="line">All code</span><br><span class="line">========</span><br><span class="line">   0:   89 e5                   mov    %esp,%ebp</span><br><span class="line">   2:   41 57                   push   %r15</span><br><span class="line">   4:   41 56                   push   %r14</span><br><span class="line">   6:   41 55                   push   %r13</span><br><span class="line">   8:   4c 8d 6d b0             lea    -0x50(%rbp),%r13</span><br><span class="line">   c:   41 54                   push   %r12</span><br><span class="line">   e:   4c 89 ee                mov    %r13,%rsi</span><br><span class="line">  11:   49 89 fc                mov    %rdi,%r12</span><br><span class="line">  14:   53                      push   %rbx</span><br><span class="line">  15:   48 8d 5d c0             lea    -0x40(%rbp),%rbx</span><br><span class="line">  19:   48 83 ec 30             sub    $0x30,%rsp</span><br><span class="line">  1d:   65 48 8b 04 25 28 00    mov    %gs:0x28,%rax</span><br><span class="line">  24:   00 00</span><br><span class="line">  26:   48 89 45 d0             mov    %rax,-0x30(%rbp)</span><br><span class="line">  2a:*  48 8b 47 18             mov    0x18(%rdi),%rax          &lt;-- trapping instruction</span><br><span class="line">  2e:   4c 89 6d b0             mov    %r13,-0x50(%rbp)</span><br><span class="line">  32:   4c 89 6d b8             mov    %r13,-0x48(%rbp)</span><br><span class="line">  36:   48 89 5d c0             mov    %rbx,-0x40(%rbp)</span><br><span class="line">  3a:   48 89 5d c8             mov    %rbx,-0x38(%rbp)</span><br><span class="line">  3e:   48                      rex.W</span><br><span class="line">  3f:   89                      .byte 0x89</span><br><span class="line"></span><br><span class="line">Code starting with the faulting instruction</span><br><span class="line">===========================================</span><br><span class="line">   0:   48 8b 47 18             mov    0x18(%rdi),%rax</span><br><span class="line">   4:   4c 89 6d b0             mov    %r13,-0x50(%rbp)</span><br><span class="line">   8:   4c 89 6d b8             mov    %r13,-0x48(%rbp)</span><br><span class="line">   c:   48 89 5d c0             mov    %rbx,-0x40(%rbp)</span><br><span class="line">  10:   48 89 5d c8             mov    %rbx,-0x38(%rbp)</span><br><span class="line">  14:   48                      rex.W</span><br><span class="line">  15:   89                      .byte 0x89</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="2-8-x86-64-Registers"><a href="#2-8-x86-64-Registers" class="headerlink" title="2.8 x86_64 Registers "></a>2.8 x86_64 Registers <a id="x86_64Registers"></a></h4><p>RDI -  Pass 1st parameter<br>RSI - Pass 2nd parameter<br>RDX - Pass 3rd parameter<br>RCX - Pass 4th parameter<br>R8 - Pass 5th parameter<br>R9 - Pass 6th parameter<br>R10 to R15 - General Purpose Registers<br>RAX -  Store return value of a function call<br>RSP -  Stack pointer, always point to the top of stack<br>RBP - Base Pointer, point to the bottom of the last function frame. But if disable frame pointer during compilation, it’s a General Purpose Register.<br>CR0 - Contains various control flags that modify the basic operation of the processor. R<br>CR2 - Contains the virtual address of a page fault.<br>CR3 - Contains the physical address of the page table of the current process<br>CR4 - Used in protected mode to control operations such as virtual-8086 support, enabling I&#x2F;O breakpoints, page size extension and machine-check exceptions.<br><a href="#%5B2%5D">[2]</a></p>
+<p> In the example, the CS is 0010, so it’s in kernel space. <a href="#%5B4%5D">[4]</a><a href="#%5B6%5D">[6]</a><br><code>CS: 0010</code><br>In 64-bit mode the segment registers still point to IDT or GDT entries. However the IDT&#x2F;GDT entries only contain limited information. See the following figure <a id="Code Segment"></a><br><img   src="https://github.com/xwsong/xwsong.github.io/blob/main/images/segment_selector.PNG?raw=true"  alt="Section 3.4.2: Segment Selectors  and Figure 3-6: Segment Selector of the Intel Software Developer Manual, Volume 3-A" title="Code Segment"></p>
+<ul>
+<li><code>bit 0 and 1</code>  &#x3D;&#x3D; Specifies the privilege level of the selector. The privilege level can range from 0 to 3, with 0 being the most privileged level. 3 is user level.</li>
+<li><code>bit 2</code>  &#x3D;&#x3D; 0 selects GDT, 1 selects LDT</li>
+<li><code>bit 3 - 15</code> Selects one of 8192 descriptors in the GDT or LDT.<br>In kernel 64-bit mode, kernel and user CS definitions are</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> GDT_ENTRY_KERNEL_CS             2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GDT_ENTRY_DEFAULT_USER_CS       6</span></span><br></pre></td></tr></table></figure>
+<p>DS and ES - Generally they are zero.<br>E&#x2F;RFLAGS - Contains all states of cpu and program at runtime</p>
+<table>
+<thead>
+<tr>
+<th>Bit(s)</th>
+<th>Label</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>CF</td>
+<td>Carry Flag</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>2</td>
+<td>PF</td>
+<td>Parity Flag</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>4</td>
+<td>AF</td>
+<td>Auxiliary Carry Flag</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ZF</td>
+<td>Zero Flag</td>
+</tr>
+<tr>
+<td>7</td>
+<td>SF</td>
+<td>Sign Flag</td>
+</tr>
+<tr>
+<td>8</td>
+<td>TF</td>
+<td>Trap Flag</td>
+</tr>
+<tr>
+<td>9</td>
+<td>IF</td>
+<td>Interrupt Enable Flag</td>
+</tr>
+<tr>
+<td>10</td>
+<td>DF</td>
+<td>Direction Flag</td>
+</tr>
+<tr>
+<td>11</td>
+<td>OF</td>
+<td>Overflow Flag</td>
+</tr>
+<tr>
+<td>12-13</td>
+<td>IOPL</td>
+<td>I&#x2F;O Privilege Level</td>
+</tr>
+<tr>
+<td>14</td>
+<td>NT</td>
+<td>Nested Task</td>
+</tr>
+<tr>
+<td>15</td>
+<td>0</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>16</td>
+<td>RF</td>
+<td>Resume Flag</td>
+</tr>
+<tr>
+<td>17</td>
+<td>VM</td>
+<td>Virtual-8086 Mode</td>
+</tr>
+<tr>
+<td>18</td>
+<td>AC</td>
+<td>Alignment Check &#x2F; Access Control</td>
+</tr>
+<tr>
+<td>19</td>
+<td>VIF</td>
+<td>Virtual Interrupt Flag</td>
+</tr>
+<tr>
+<td>20</td>
+<td>VIP</td>
+<td>Virtual Interrupt Pending</td>
+</tr>
+<tr>
+<td>21</td>
+<td>ID</td>
+<td>D Flag</td>
+</tr>
+<tr>
+<td>22-63</td>
+<td>0</td>
+<td>Reserved</td>
+</tr>
+</tbody></table>
+<h4 id="2-9-Call-Trace"><a href="#2-9-Call-Trace" class="headerlink" title="2. 9 Call Trace "></a>2. 9 Call Trace <a id="CallTrace"></a></h4><p>The call trace is the call path that is from system call to the function where program stopped.  Every real function has a unique stack frame that includes some register values, local variables, temporary data, etc.  The following is a frame example: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.664145]  enable_slot+0x233/0x460</span><br></pre></td></tr></table></figure>
+<p>0x460 is the length of machine code bytes of enable_slot(), 0x233 is the offset where enable_slot() calls another function(). In addition, we sometimes can see the following frame</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.662509]  ? show_regs+0x72/0x90</span><br></pre></td></tr></table></figure>
+<p>A frame with <code>?</code> sign means it’s leftover of previous call, which is unreliable and not for the the current stack.</p>
+<h3 id="References"><a href="#References" class="headerlink" title="References "></a>References <a id="References"></a></h3><p>[1] <a class="link"   target="_blank" rel="noopener" href="https://www.opensourceforu.com/2011/01/understanding-a-kernel-oops/" >Understanding a Kernel Oops<i class="fas fa-external-link-alt"></i></a> <a id="[1]"></a><br>[2] <a class="link"   target="_blank" rel="noopener" href="https://wiki.osdev.org/CPU_Registers_x86-64" >x86 Registers<i class="fas fa-external-link-alt"></i></a> <a id="[2]"></a><br>[3] <a class="link"   target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/tainted-kernels.html" >Tainted Kernel<i class="fas fa-external-link-alt"></i></a> <a id="[3]"></a><br>[4] <a class="link"   target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Control_register#Control_registers_in_Intel_x86_series" >Control Register<i class="fas fa-external-link-alt"></i></a> <a id="[4]"></a><br>[5] <a class="link"   target="_blank" rel="noopener" href="https://d3s.mff.cuni.cz/files/teaching/nswi161/vlastimil-babka-kernel-debugging.pdf" >Kernel Debugging<i class="fas fa-external-link-alt"></i></a> <a id="[5]"></a><br>[6] <a class="link"   target="_blank" rel="noopener" href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf" >Section 3.4.2: Segment Selectors  and Figure 3-6: Segment Selector of the Intel Software Developer Manual, Volume 3-A<i class="fas fa-external-link-alt"></i></a> <a id="[6]"></a><br>[7] <a class="link"   target="_blank" rel="noopener" href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf" >Interrupt 14—Page-Fault Exception (#PF) Intel® 64 and IA-32 Architectures Software Developer’s Manual Volume 3<i class="fas fa-external-link-alt"></i></a> <a id="[7]"></a></p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/01/06/kernel/read_assembly_on_x86_64/"
+                                   title="How to read assembly and stack data on x86_64"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">How to read assembly and stack data on x86_64</span>
+                                        <span class="post-nav-item">Next posts</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        Powered by&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;&&nbsp;Theme&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
