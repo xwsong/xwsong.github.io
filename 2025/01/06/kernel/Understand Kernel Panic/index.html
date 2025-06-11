@@ -195,7 +195,7 @@
             
                 <span class="meta-info-item post-update-date">
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Wed Jun 11 2025 11:21:06 GMT+0800">2025-06-11 11:21:06</span>
+                    <span class="datetime" data-updated="Wed Jun 11 2025 11:26:39 GMT+0800">2025-06-11 11:26:39</span>
                 </span>
             
         
@@ -223,7 +223,7 @@
 
                     
                          <h2 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h2><p>1 <a href="#Example">A Real Example</a><br>2 <a href="#UnderstandeverypartsofOopsPanic">Understand every parts of Oops&#x2F;Panic</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.1 <a href="#OopsType">Oops Type</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.2 <a href="#PageFaultContext">Page Fault Context</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.3 <a href="#PageTableInfo">Page Table Info</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.4 <a href="#OopsCode">Oops Code</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.4.1 <a href="#OopsCounter">Oops Counter</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.4.2 <a href="#Importantkernelconfigoptions">Important kernel config options</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.5 <a href="#BasicInfo">Basic Info</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.5.1 <a href="#Taintedkernel">Tainted kernel</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.6 <a href="#OopsSpot">Oops Spot</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.7 <a href="#CodeHex">Code Hex</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.8 <a href="#x86_64Registers">x86_64 Registers</a><br>&nbsp;&nbsp;&nbsp;&nbsp;2.9 <a href="#CallTrace">Call trace</a><br><a href="#References">References</a></p>
-<h3 id="1-A-Real-Example"><a href="#1-A-Real-Example" class="headerlink" title="1 A Real Example "></a>1 A Real Example <a id="Example"></a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">[   <span class="number">20.656398</span>] BUG: kernel <span class="literal">NULL</span> pointer dereference, address: <span class="number">0000000000000018</span></span><br><span class="line">[   <span class="number">20.656834</span>] #PF: supervisor read access in kernel mode</span><br><span class="line">[   <span class="number">20.657042</span>] #PF: error_code(<span class="number">0x0000</span>) - not-present page</span><br><span class="line">[   <span class="number">20.657250</span>] PGD <span class="number">0</span> P4D <span class="number">0</span> </span><br><span class="line">[   <span class="number">20.657358</span>] Oops: <span class="number">0000</span> [#<span class="number">1</span>] PREEMPT SMP NOPTI</span><br><span class="line">[   <span class="number">20.657536</span>] CPU: <span class="number">0</span> PID: <span class="number">51</span> Comm: kworker/u2:<span class="number">3</span> Not tainted <span class="number">6.5</span><span class="number">.0</span>+ #<span class="number">5</span></span><br><span class="line">[   <span class="number">20.657790</span>] Hardware name: QEMU Standard <span class="title function_">PC</span> <span class="params">(i440FX + PIIX, <span class="number">1996</span>)</span>, BIOS 1.15.0-1 04/01/2014</span><br><span class="line">[   20.658120] Workqueue: kacpi_hotplug acpi_hotplug_work_fn</span><br><span class="line">[   20.658389] RIP: 0010:pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.658654] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br><span class="line">[   20.659383] RSP: 0018:ffffc1dc405cbcc8 EFLAGS: 00010282</span><br><span class="line">[   20.659635] RAX: 7b171119e4e9aa00 RBX: ffffc1dc405cbce0 RCX: 0000000000000001</span><br><span class="line">[   20.660039] RDX: 0000000000000000 RSI: ffffc1dc405cbcd0 RDI: 0000000000000000</span><br><span class="line">[   20.660325] RBP: ffffc1dc405cbd20 R08: 0000000000000000 R09: 0000000000000000</span><br><span class="line">[   20.660612] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000000000000</span><br><span class="line">[   20.660956] R13: ffffc1dc405cbcd0 R14: ffffa07581a9e828 R15: 0000000000000000</span><br><span class="line">[   20.661250] FS:  0000000000000000<span class="params">(<span class="number">0000</span>)</span> GS:<span class="title function_">ffffa075bfc00000</span><span class="params">(<span class="number">0000</span>)</span> knlGS:0000000000000000</span><br><span class="line">[   20.661581] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033</span><br><span class="line">[   20.661821] CR2: 0000000000000018 CR3: 00000000027fa006 CR4: 0000000000770ef0</span><br><span class="line">[   20.662114] PKRU: 55555554</span><br><span class="line">[   20.662234] Call Trace:</span><br><span class="line">[   20.662415]  &lt;TASK&gt;</span><br><span class="line">[   20.662509]  ? show_regs+0x72/0x90</span><br><span class="line">[   20.662698]  ? __die+0x25/0x80</span><br><span class="line">[   20.662826]  ? page_fault_oops+0x154/0x4c0</span><br><span class="line">[   20.662994]  ? __pfx_acpi_dev_for_one_check+0x10/0x10</span><br><span class="line">[   20.663200]  ? device_for_each_child+0x6f/0xa0</span><br><span class="line">[   20.663381]  ? do_user_addr_fault+0x330/0x6e0</span><br><span class="line">[   20.663563]  ? exc_page_fault+0x84/0x1b0</span><br><span class="line">[   20.663726]  ? asm_exc_page_fault+0x27/0x30</span><br><span class="line">[   20.663900]  ? pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.664145]  enable_slot+0x233/0x460</span><br><span class="line">[   20.664294]  ? trim_stale_devices+0x10b/0x180</span><br><span class="line">[   20.664473]  ? get_slot_status+0xa2/0x110</span><br><span class="line">[   20.664640]  acpiphp_check_bridge.part.0+0x127/0x150</span><br><span class="line">[   20.664843]  acpiphp_hotplug_notify+0x24f/0x2d0</span><br><span class="line">[   20.665029]  ? __pfx_acpiphp_hotplug_notify+0x10/0x10</span><br><span class="line">[   20.665236]  acpi_device_hotplug+0xc7/0x540</span><br><span class="line">[   20.665409]  acpi_hotplug_work_fn+0x22/0x40</span><br><span class="line">[   20.665580]  process_one_work+0x178/0x360</span><br><span class="line">[   20.665748]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.665923]  worker_thread+0x307/0x430</span><br><span class="line">[   20.666079]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.666260]  kthread+0xf4/0x130</span><br><span class="line">[   20.666396]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666552]  ret_from_fork+0x43/0x70</span><br><span class="line">[   20.666701]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666860]  ret_from_fork_asm+0x1b/0x30</span><br><span class="line">[   20.667022]  &lt;/TASK&gt;</span><br><span class="line">[   20.667116] Modules linked in:</span><br><span class="line">[   20.667251] CR2: 0000000000000018</span><br><span class="line">[   20.667390] ---[ end trace 0000000000000000 ]---</span><br><span class="line">[... snip ...]</span><br><span class="line">[   20.671194] Kernel panic - not syncing: Fatal exception</span><br><span class="line">[   20.671579] Kernel Offset: 0x30200000 from 0<span class="title function_">xffffffff81000000</span> <span class="params">(relocation range: <span class="number">0xffffffff80000000</span><span class="number">-0xffffffffbfffffff</span>)</span></span><br><span class="line">[   20.672007] ---[ end Kernel panic - not syncing: Fatal exception ]---</span><br></pre></td></tr></table></figure>
+<h3 id="1-A-Real-Example"><a href="#1-A-Real-Example" class="headerlink" title="1 A Real Example "></a>1 A Real Example <a id="Example"></a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">[   20.656398] BUG: kernel NULL pointer dereference, address: 0000000000000018</span><br><span class="line">[   20.656834] #PF: supervisor read access in kernel mode</span><br><span class="line">[   20.657042] #PF: error_code(0x0000) - not-present page</span><br><span class="line">[   20.657250] PGD 0 P4D 0 </span><br><span class="line">[   20.657358] Oops: 0000 [#1] PREEMPT SMP NOPTI</span><br><span class="line">[   20.657536] CPU: 0 PID: 51 Comm: kworker/u2:3 Not tainted 6.5.0+ #5</span><br><span class="line">[   20.657790] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.15.0-1 04/01/2014</span><br><span class="line">[   20.658120] Workqueue: kacpi_hotplug acpi_hotplug_work_fn</span><br><span class="line">[   20.658389] RIP: 0010:pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.658654] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br><span class="line">[   20.659383] RSP: 0018:ffffc1dc405cbcc8 EFLAGS: 00010282</span><br><span class="line">[   20.659635] RAX: 7b171119e4e9aa00 RBX: ffffc1dc405cbce0 RCX: 0000000000000001</span><br><span class="line">[   20.660039] RDX: 0000000000000000 RSI: ffffc1dc405cbcd0 RDI: 0000000000000000</span><br><span class="line">[   20.660325] RBP: ffffc1dc405cbd20 R08: 0000000000000000 R09: 0000000000000000</span><br><span class="line">[   20.660612] R10: 0000000000000000 R11: 0000000000000000 R12: 0000000000000000</span><br><span class="line">[   20.660956] R13: ffffc1dc405cbcd0 R14: ffffa07581a9e828 R15: 0000000000000000</span><br><span class="line">[   20.661250] FS:  0000000000000000(0000) GS:ffffa075bfc00000(0000) knlGS:0000000000000000</span><br><span class="line">[   20.661581] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033</span><br><span class="line">[   20.661821] CR2: 0000000000000018 CR3: 00000000027fa006 CR4: 0000000000770ef0</span><br><span class="line">[   20.662114] PKRU: 55555554</span><br><span class="line">[   20.662234] Call Trace:</span><br><span class="line">[   20.662415]  &lt;TASK&gt;</span><br><span class="line">[   20.662509]  ? show_regs+0x72/0x90</span><br><span class="line">[   20.662698]  ? __die+0x25/0x80</span><br><span class="line">[   20.662826]  ? page_fault_oops+0x154/0x4c0</span><br><span class="line">[   20.662994]  ? __pfx_acpi_dev_for_one_check+0x10/0x10</span><br><span class="line">[   20.663200]  ? device_for_each_child+0x6f/0xa0</span><br><span class="line">[   20.663381]  ? do_user_addr_fault+0x330/0x6e0</span><br><span class="line">[   20.663563]  ? exc_page_fault+0x84/0x1b0</span><br><span class="line">[   20.663726]  ? asm_exc_page_fault+0x27/0x30</span><br><span class="line">[   20.663900]  ? pci_assign_unassigned_bridge_resources+0x31/0x270</span><br><span class="line">[   20.664145]  enable_slot+0x233/0x460</span><br><span class="line">[   20.664294]  ? trim_stale_devices+0x10b/0x180</span><br><span class="line">[   20.664473]  ? get_slot_status+0xa2/0x110</span><br><span class="line">[   20.664640]  acpiphp_check_bridge.part.0+0x127/0x150</span><br><span class="line">[   20.664843]  acpiphp_hotplug_notify+0x24f/0x2d0</span><br><span class="line">[   20.665029]  ? __pfx_acpiphp_hotplug_notify+0x10/0x10</span><br><span class="line">[   20.665236]  acpi_device_hotplug+0xc7/0x540</span><br><span class="line">[   20.665409]  acpi_hotplug_work_fn+0x22/0x40</span><br><span class="line">[   20.665580]  process_one_work+0x178/0x360</span><br><span class="line">[   20.665748]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.665923]  worker_thread+0x307/0x430</span><br><span class="line">[   20.666079]  ? __pfx_worker_thread+0x10/0x10</span><br><span class="line">[   20.666260]  kthread+0xf4/0x130</span><br><span class="line">[   20.666396]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666552]  ret_from_fork+0x43/0x70</span><br><span class="line">[   20.666701]  ? __pfx_kthread+0x10/0x10</span><br><span class="line">[   20.666860]  ret_from_fork_asm+0x1b/0x30</span><br><span class="line">[   20.667022]  &lt;/TASK&gt;</span><br><span class="line">[   20.667116] Modules linked in:</span><br><span class="line">[   20.667251] CR2: 0000000000000018</span><br><span class="line">[   20.667390] ---[ end trace 0000000000000000 ]---</span><br><span class="line">[... snip ...]</span><br><span class="line">[   20.671194] Kernel panic - not syncing: Fatal exception</span><br><span class="line">[   20.671579] Kernel Offset: 0x30200000 from 0xffffffff81000000 (relocation range: 0xffffffff80000000-0xffffffffbfffffff)</span><br><span class="line">[   20.672007] ---[ end Kernel panic - not syncing: Fatal exception ]---</span><br></pre></td></tr></table></figure>
 <h3 id="2-Understand-every-parts-of-Oops-Panic"><a href="#2-Understand-every-parts-of-Oops-Panic" class="headerlink" title="2 Understand every parts of Oops&#x2F;Panic "></a>2 Understand every parts of Oops&#x2F;Panic <a id="UnderstandeverypartsofOopsPanic"></a></h3><h4 id="2-1-Oops-Type"><a href="#2-1-Oops-Type" class="headerlink" title="2.1 Oops Type "></a>2.1 Oops Type <a id="OopsType"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.656398] BUG: kernel NULL pointer dereference, address: 0000000000000018</span><br></pre></td></tr></table></figure>
 
 <h4 id="2-2-Page-Fault-Context"><a href="#2-2-Page-Fault-Context" class="headerlink" title="2.2 Page Fault Context "></a>2.2 Page Fault Context <a id="PageFaultContext"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[   20.656834] #PF: supervisor read access in kernel mode</span><br><span class="line">[   20.657042] #PF: error_code(0x0000) - not-present page</span><br></pre></td></tr></table></figure>
@@ -248,7 +248,136 @@
 <p>The kernel will mark itself as ‘tainted’ when something occurs that<br>might be relevant later when investigating problems. Don’t worry too<br>much about this, most of the time it’s not a problem to run a tainted<br>kernel; the information is mainly of interest once someone wants to<br>investigate some problem, as its real cause might be the event that<br>got the kernel tainted. That’s why bug reports from tainted kernels<br>will often be ignored by developers, hence try to reproduce problems<br>with an untainted kernel.</p>
 <p>Note the kernel will remain tainted even after you undo what caused<br>the taint (i.e. unload a proprietary kernel module), to indicate the<br>kernel remains not trustworthy. That’s also why the kernel will print<br>the tainted state when it notices an internal problem (a ‘kernel<br>bug’), a recoverable error (‘kernel oops’) or a non-recoverable error<br>(‘kernel panic’) and writes debug information about this to the logs<br><code>dmesg</code>  outputs. It’s also possible to check the tainted state at<br>runtime through a file in  <code>/proc/</code>.</p>
 </blockquote>
-<p>| Bit  | Log  | Number | Reason that got the kernel tainted<br>|–|–|–|–|–|<br>| 0 | G&#x2F;P | 1 | proprietary module was loaded |<br>| 1 | F | 2 | module was force loaded |<br>| 2 | S | 4 | kernel running on an out of specification system |<br>| 3 | R | 8 | module was force unloaded<br>| 4 | M | 16 | processor reported a Machine Check Exception (MCE)<br>| 5 | B | 32 | bad page referenced or some unexpected page flags<br>| 6 | U | 64 | taint requested by userspace application<br>| 7 | D | 128 | kernel died recently, i.e. there was an OOPS or BUG<br>| 8 | A | 256 | ACPI table overridden by user<br>| 9 | W | 512 | kernel issued warning<br>| 10 | C | 1024 | staging driver was loaded<br>| 11 | I | 2048 | workaround for bug in platform firmware applied<br>| 12 | O | 4096 | externally-built (“out-of-tree”) module was loaded<br>| 13 | E | 8192 | unsigned module was loaded<br>| 14 | L | 16384 | soft lockup occurred<br>| 15 | K | 32768 | kernel has been live patched<br>| 16 | X | 65536 | auxiliary taint, defined for and used by distros<br>| 17 | T | 131072 | kernel was built with the struct randomization plugin<br>| 18 | N | 262144 | an in-kernel test has been run<br>| 19 | J | 524288 | userspace used a mutating debug operation in fwctl</p>
+<table>
+<thead>
+<tr>
+<th>Bit</th>
+<th>Log</th>
+<th>Number</th>
+<th>Reason that got the kernel tainted</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>G&#x2F;P</td>
+<td>1</td>
+<td>proprietary module was loaded</td>
+</tr>
+<tr>
+<td>1</td>
+<td>F</td>
+<td>2</td>
+<td>module was force loaded</td>
+</tr>
+<tr>
+<td>2</td>
+<td>S</td>
+<td>4</td>
+<td>kernel running on an out of specification system</td>
+</tr>
+<tr>
+<td>3</td>
+<td>R</td>
+<td>8</td>
+<td>module was force unloaded</td>
+</tr>
+<tr>
+<td>4</td>
+<td>M</td>
+<td>16</td>
+<td>processor reported a Machine Check Exception (MCE)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>B</td>
+<td>32</td>
+<td>bad page referenced or some unexpected page flags</td>
+</tr>
+<tr>
+<td>6</td>
+<td>U</td>
+<td>64</td>
+<td>taint requested by userspace application</td>
+</tr>
+<tr>
+<td>7</td>
+<td>D</td>
+<td>128</td>
+<td>kernel died recently, i.e. there was an OOPS or BUG</td>
+</tr>
+<tr>
+<td>8</td>
+<td>A</td>
+<td>256</td>
+<td>ACPI table overridden by user</td>
+</tr>
+<tr>
+<td>9</td>
+<td>W</td>
+<td>512</td>
+<td>kernel issued warning</td>
+</tr>
+<tr>
+<td>10</td>
+<td>C</td>
+<td>1024</td>
+<td>staging driver was loaded</td>
+</tr>
+<tr>
+<td>11</td>
+<td>I</td>
+<td>2048</td>
+<td>workaround for bug in platform firmware applied</td>
+</tr>
+<tr>
+<td>12</td>
+<td>O</td>
+<td>4096</td>
+<td>externally-built (“out-of-tree”) module was loaded</td>
+</tr>
+<tr>
+<td>13</td>
+<td>E</td>
+<td>8192</td>
+<td>unsigned module was loaded</td>
+</tr>
+<tr>
+<td>14</td>
+<td>L</td>
+<td>16384</td>
+<td>soft lockup occurred</td>
+</tr>
+<tr>
+<td>15</td>
+<td>K</td>
+<td>32768</td>
+<td>kernel has been live patched</td>
+</tr>
+<tr>
+<td>16</td>
+<td>X</td>
+<td>65536</td>
+<td>auxiliary taint, defined for and used by distros</td>
+</tr>
+<tr>
+<td>17</td>
+<td>T</td>
+<td>131072</td>
+<td>kernel was built with the struct randomization plugin</td>
+</tr>
+<tr>
+<td>18</td>
+<td>N</td>
+<td>262144</td>
+<td>an in-kernel test has been run</td>
+</tr>
+<tr>
+<td>19</td>
+<td>J</td>
+<td>524288</td>
+<td>userspace used a mutating debug operation in fwctl</td>
+</tr>
+</tbody></table>
 <h4 id="2-6-Oops-Spot"><a href="#2-6-Oops-Spot" class="headerlink" title="2.6 Oops Spot "></a>2.6 Oops Spot <a id="OopsSpot"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.658389] RIP: 0010:pci_assign_unassigned_bridge_resources+0x31/0x270</span><br></pre></td></tr></table></figure>
 <p>The program stopped at the offset 0x31 of pci_assign_unassigned_bridge_resources, 0x270 is the all bytes of pci_assign_unassigned_bridge_resources instructions. 0010 is the CS value,  will explain it in Section Registers.</p>
 <h4 id="2-7-Code-Hex"><a href="#2-7-Code-Hex" class="headerlink" title="2.7 Code Hex "></a>2.7 Code Hex <a id="CodeHex"></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   20.658654] Code: 89 e5 41 57 41 56 41 55 4c 8d 6d b0 41 54 4c 89 ee 49 89 fc 53 48 8d 5d c0 48 83 ec 30 65 48 8b 04 25 28 00 00 00 48 89 45 d0 &lt;48&gt; 8b 47 18 4c 89 6d b0 4c 89 6d b8 48 89 5d c0 48 89 5d c8 48 89</span><br></pre></td></tr></table></figure>
