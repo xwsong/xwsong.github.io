@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Keep Team">
+    
+    <title>
+        
+            How to read assembly and stack data on x86_64 |
+        
+        Keep Theme
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/logo.svg">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"en"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#0066cc","title":"Keep Theme","author":"Keep Team","avatar":"/images/avatar.svg","logo":"/images/logo.svg","favicon":"/images/logo.svg"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":false,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":false,"percent":false,"hide_header":true},"home":{"announcement":null,"category":false,"tag":false,"post_datetime":"updated"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2020,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"}
+    KEEP.language_code_block = {"copy":"Copy code","copied":"Copied","fold":"Fold code block","folded":"Folded"}
+    KEEP.language_copy_copyright = {"copy":"Copy copyright info","copied":"Copied","title":"Original post title","author":"Original post author","link":"Original post link"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/logo.svg">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               Keep Theme
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                HOME
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                ARCHIVES
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            HOME
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            ARCHIVES
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        How to read assembly and stack data on x86_64
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.svg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Xiongwei Song &lt;sxwbruce@gmail.com&gt;</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-02-09 00:00:00</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Sep 02 2025 22:27:00 GMT+0800">2025-09-02 22:27:00</span>
+                </span>
+            
+        
+
+        
+
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h3 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h3><p>This blog post is to record the crash skills that I commonly used during analyzing vmcores. Some of the commands are not quite common but very useful from my experience. I hope they can help you and save some time when analyzing kernel issues. Happy kernel hacking!</p>
+<h3 id="Backtrace"><a href="#Backtrace" class="headerlink" title="Backtrace"></a>Backtrace</h3><p>To understand how dataflow is in a whole calltrace, understanding the data of stack is very important. For example, in a NULL pointer dereference bug, we usually check when a pointer becomes NULL.</p>
+<h4 id="All-content-of-a-process-stack"><a href="#All-content-of-a-process-stack" class="headerlink" title="All content of a process stack"></a>All content of a process stack</h4><p>Command: bt -f<br>Purpose: display full stack data in hex</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; bt -f</span><br><span class="line">PID: 6630     TASK: ff3c58d86b214000  CPU: 43   COMMAND: &quot;bash&quot;</span><br><span class="line"> #0 [ff4c381ae430fbf0] machine_kexec at ffffffffb6690ec0</span><br><span class="line">    ff4c381ae430fbf8: 0000000000000018 0000000000000000</span><br><span class="line">    ff4c381ae430fc08: 0000000b560e3000 ff3c58e2960e3000</span><br><span class="line">    ff4c381ae430fc18: 0000000b560e2000 0000000000000000</span><br><span class="line">    ff4c381ae430fc28: ac1759be933e7500 0000000000000000</span><br><span class="line">    ff4c381ae430fc38: ff4c381ae430fc58 ffffffffb7be8a8a</span><br><span class="line">    ff4c381ae430fc48: ff4c381ae430fda8 ffffffffb67bc153</span><br><span class="line"> #1 [ff4c381ae430fc50] __crash_kexec at ffffffffb67bc153</span><br><span class="line">    ff4c381ae430fc58: 0000000000000000 ffffffffb77807a0</span><br><span class="line">    ff4c381ae430fc68: ff4c381ae430fda8 ffffffffb7be8a8a</span><br><span class="line">    ff4c381ae430fc78: ff4c381ae430fd98 0000000000000000</span><br><span class="line">    ff4c381ae430fc88: ff4c381ae430f9f0 0000000000000000</span><br><span class="line">    ff4c381ae430fc98: 80000000ffff076f 0000000000000000</span><br><span class="line">    ff4c381ae430fca8: 0000000000000000 0000000000000000</span><br><span class="line">    ff4c381ae430fcb8: 0000000000000001 0000000000000000</span><br><span class="line">    ff4c381ae430fcc8: 0000000000000000 ff4c381ae430fda8</span><br><span class="line">    ff4c381ae430fcd8: ffffffffb67bc1f7 0000000000000010</span><br><span class="line">    ff4c381ae430fce8: 0000000000000046 ff4c381ae430fc58</span><br><span class="line">    ff4c381ae430fcf8: 0000000000000018 ac1759be933e7500</span><br><span class="line">    ff4c381ae430fd08: 0000000000000000 ff4c381ae430fd98</span><br><span class="line">    ff4c381ae430fd18: ffffffffb724c430</span><br><span class="line"> #2 [ff4c381ae430fd18] panic at ffffffffb724c430</span><br><span class="line">    ff4c381ae430fd20: 0000000000000008 ff4c381ae430fda8</span><br><span class="line">    ff4c381ae430fd30: ff4c381ae430fd40 ac1759be933e7500</span><br><span class="line">    ff4c381ae430fd40: ffffffffb724c742 ff3c58e275ea3500</span><br><span class="line">    ff4c381ae430fd50: 0000000000000000 0000000000000000</span><br><span class="line">    ff4c381ae430fd60: 0000000000000000 c0000000fffeffff</span><br><span class="line">    ff4c381ae430fd70: 0000000000000063 0000000000000000</span><br><span class="line">    ff4c381ae430fd80: 0000000000000004 0000000000000000</span><br><span class="line">    ff4c381ae430fd90: ffffffffb77807a0 0000000000000000</span><br><span class="line">    ff4c381ae430fda0: ffffffffb6e1e7b6</span><br><span class="line">...snip...</span><br><span class="line">    RIP: 00007fca60321770  RSP: 00007ffd2d3ffc78  RFLAGS: 00000202</span><br><span class="line">    RAX: ffffffffffffffda  RBX: 0000000000000002  RCX: 00007fca60321770</span><br><span class="line">    RDX: 0000000000000002  RSI: 000055f3915de110  RDI: 0000000000000001</span><br><span class="line">    RBP: 000055f3915de110   R8: 0000000000000000   R9: 0000000000000000</span><br><span class="line">    R10: 00007fca60210f08  R11: 0000000000000202  R12: 0000000000000002</span><br><span class="line">    R13: 00007fca604005c0  R14: 00007fca603fdf60  R15: 000055f3917a53e0</span><br><span class="line">    ORIG_RAX: 0000000000000001  CS: 0033  SS: 002b</span><br></pre></td></tr></table></figure>
+<h4 id="All-data-of-the-stack-of-a-calltrace-with-some-symbols-translated"><a href="#All-data-of-the-stack-of-a-calltrace-with-some-symbols-translated" class="headerlink" title="All data of the stack of a calltrace with some symbols translated"></a>All data of the stack of a calltrace with some symbols translated</h4><p>Command: bt -FF<br>Purpose: display full stack data and convert hex to symbols if possible</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; bt -FF</span><br><span class="line">PID: 6630     TASK: ff3c58d86b214000  CPU: 43   COMMAND: &quot;bash&quot;</span><br><span class="line">... snip ...</span><br><span class="line"> #2 [ff4c381ae430fd18] panic at ffffffffb724c430</span><br><span class="line">    ff4c381ae430fd20: 0000000000000008 ff4c381ae430fda8</span><br><span class="line">    ff4c381ae430fd30: ff4c381ae430fd40 ac1759be933e7500</span><br><span class="line">    ff4c381ae430fd40: _printk+82       ff3c58e275ea3500</span><br><span class="line">    ff4c381ae430fd50: 0000000000000000 0000000000000000</span><br><span class="line">    ff4c381ae430fd60: 0000000000000000 c0000000fffeffff</span><br><span class="line">    ff4c381ae430fd70: 0000000000000063 0000000000000000</span><br><span class="line">    ff4c381ae430fd80: 0000000000000004 0000000000000000</span><br><span class="line">    ff4c381ae430fd90: sysrq_crash_op   0000000000000000</span><br><span class="line">    ff4c381ae430fda0: sysrq_handle_crash+22</span><br><span class="line"> #3 [ff4c381ae430fda0] sysrq_handle_crash at ffffffffb6e1e7b6</span><br><span class="line">    ff4c381ae430fda8: __handle_sysrq+156</span><br><span class="line">... snip ...</span><br></pre></td></tr></table></figure>
+<h3 id="Memory"><a href="#Memory" class="headerlink" title="Memory"></a>Memory</h3><p>There are 2 methods allocating memory in kernel:</p>
+<ul>
+<li>BUDDY APIs</li>
+<li>SLAB APIs</li>
+</ul>
+<p>The kmem command provide the statistics for the memory that are allocated through BUDDY APIs. For details of SLAB, we need to check by “kmem -s” or &#x2F;proc&#x2F;slabinfo. </p>
+<h4 id="Basic-Memory-Info"><a href="#Basic-Memory-Info" class="headerlink" title="Basic Memory Info"></a>Basic Memory Info</h4><p>Command: kmem -i<br>Purpose: display basic memory usage</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; kmem -i</span><br><span class="line">                 PAGES        TOTAL      PERCENTAGE</span><br><span class="line">    TOTAL MEM  10911900      41.6 GB         ----</span><br><span class="line">         FREE    91484     357.4 MB    0% of TOTAL MEM</span><br><span class="line">         USED  10820416      41.3 GB   99% of TOTAL MEM</span><br><span class="line">       SHARED  1240422       4.7 GB   11% of TOTAL MEM</span><br><span class="line">      BUFFERS    97579     381.2 MB    0% of TOTAL MEM</span><br><span class="line">       CACHED  5990738      22.9 GB   54% of TOTAL MEM</span><br><span class="line">         SLAB   449927       1.7 GB    4% of TOTAL MEM</span><br><span class="line"></span><br><span class="line">   TOTAL HUGE        0            0         ----</span><br><span class="line">    HUGE FREE        0            0    0% of TOTAL HUGE</span><br><span class="line"></span><br><span class="line">   TOTAL SWAP        0            0         ----</span><br><span class="line">    SWAP USED        0            0    0% of TOTAL SWAP</span><br><span class="line">    SWAP FREE        0            0    0% of TOTAL SWAP</span><br><span class="line"></span><br><span class="line"> COMMIT LIMIT  5455950      20.8 GB         ----</span><br><span class="line">    COMMITTED  8475907      32.3 GB  155% of TOTAL LIMIT</span><br></pre></td></tr></table></figure>
+<p>One thing we should notice is the pages allocated by kernel modules don’t get recorded separately.  You might see ‘USED’ has a big number but don’t own by ‘SHARED’, ‘BUFFERS’, ‘CACHED’ and ‘SLAB’. In this case, some kernel modules might allocate plenty of pages.</p>
+<h4 id="SLAB-Details"><a href="#SLAB-Details" class="headerlink" title="SLAB Details"></a>SLAB Details</h4><p>Command: kmem -s<br>Purpose: display SLAB info</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; kmem -s</span><br><span class="line">CACHE             OBJSIZE  ALLOCATED     TOTAL  SLABS  SSIZE  NAME</span><br><span class="line">ff3c58e17ecf4100      784          0         0      0    32k  fat_inode_cache</span><br><span class="line">ff3c58e17ecf4800       32          0         0      0     4k  fat_cache</span><br><span class="line">ff3c58e195b5f500      248        202      3008     94     8k  nf_conntrack</span><br><span class="line">ff3c58dfd625a900      720          0         0      0    32k  ovl_inode</span><br><span class="line">ff3c58dfc9913000      808          2        78      2    32k  QIPCRTR</span><br><span class="line">ff3c58dfd1573000      528          0         0      0    16k  xfs_dqtrx</span><br><span class="line">ff3c58dfd1aeec00      208          0         0      0     8k  xfs_bui_item</span><br><span class="line">ff3c58dfd1aee500      688          0      2444     52    32k  xfs_rui_item</span><br><span class="line">ff3c58dfd1aef000      176          0      2208     48     8k  xfs_rud_item</span><br><span class="line">ff3c58dfd1aefd00      200         15       200      5     8k  xfs_ili</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h4 id="PAGE-details"><a href="#PAGE-details" class="headerlink" title="PAGE details"></a>PAGE details</h4><p>Command: kmem -p<br>Purpose: display every page info</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; kmem -p</span><br><span class="line">      PAGE        PHYSICAL      MAPPING       INDEX CNT FLAGS</span><br><span class="line">ffffe99c40000000         0                0        0  1 7ffffc0001000 reserved</span><br><span class="line">ffffe99c40000040      1000                0        0  1 7ffffc0001000 reserved</span><br><span class="line">ffffe99c40000080      2000                0        0  1 7ffffc0001000 reserved</span><br></pre></td></tr></table></figure>
+<h4 id="Find-page-table-and-page-info-from-a-virtual-address"><a href="#Find-page-table-and-page-info-from-a-virtual-address" class="headerlink" title="Find page table and page info from a virtual address"></a>Find page table and page info from a virtual address</h4><p>Command: vtop virtual_address<br>Purpose: display page table info and page attibutes given an virtual address</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; vtop ff3c58dfd1aee600</span><br><span class="line">VIRTUAL           PHYSICAL</span><br><span class="line">ff3c58dfd1aee600  891aee600</span><br><span class="line"></span><br><span class="line">PGD DIRECTORY: ffffffffb8436000</span><br><span class="line">PAGE DIRECTORY: 1ac801067</span><br><span class="line">   P4D: 1ac801588 =&gt; 1ac802067</span><br><span class="line">   PUD: 1ac802bf8 =&gt; b35fd5063</span><br><span class="line">   PMD: b35fd5468 =&gt; 8897db063</span><br><span class="line">   PTE: 8897db770 =&gt; 8000000891aee163</span><br><span class="line">  PAGE: 891aee000</span><br><span class="line"></span><br><span class="line">      PTE         PHYSICAL   FLAGS</span><br><span class="line">8000000891aee163  891aee000  (PRESENT|RW|ACCESSED|DIRTY|GLOBAL|NX)</span><br><span class="line"></span><br><span class="line">      PAGE        PHYSICAL      MAPPING       INDEX CNT FLAGS</span><br><span class="line">ffd567cca246bb80 891aee000                0        0  1 57ffffc0010200 slab,head</span><br></pre></td></tr></table></figure>
+<h4 id="Read-RAW-Memory"><a href="#Read-RAW-Memory" class="headerlink" title="Read RAW Memory"></a>Read RAW Memory</h4><p>Command: rd address count<br>Purpose: read raw memory</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; rd ff3c58dfd1aee600 10</span><br><span class="line">ff3c58dfd1aee600:  0041df3849e06c00 0000000040000000   .l.I8.A....@....</span><br><span class="line">ff3c58dfd1aee610:  0000000000000005 0000009800000098   ................</span><br><span class="line">ff3c58dfd1aee620:  00000701af286bcb 0000007800000048   .k(.....H...x...</span><br><span class="line">ff3c58dfd1aee630:  0001003500000005 000400000000001a   ....5...........</span><br><span class="line">ff3c58dfd1aee640:  0000000000000001 0000000000000000   ................</span><br></pre></td></tr></table></figure>
+
+<h3 id="Display-Structure"><a href="#Display-Structure" class="headerlink" title="Display Structure"></a>Display Structure</h3><h4 id="Display-a-struct-instance"><a href="#Display-a-struct-instance" class="headerlink" title="Display a struct instance"></a>Display a struct instance</h4><p>Command: struct struct_name address<br>Purpose: Display the whole content of a structure instance</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">crash&gt;struct dentry ff3c58dfc3560b40</span><br><span class="line">struct dentry &#123;</span><br><span class="line">  d_flags = 5242888,</span><br><span class="line">  d_seq = &#123;</span><br><span class="line">    seqcount = &#123;</span><br><span class="line">      sequence = 2</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  d_hash = &#123;</span><br><span class="line">    next = 0x0,</span><br><span class="line">    pprev = 0xff4c381ac0d03548</span><br><span class="line">  &#125;,</span><br><span class="line">  d_parent = 0xff3c58dfc34012c0,</span><br><span class="line">  d_name = &#123;</span><br><span class="line">    &#123;</span><br><span class="line">      &#123;</span><br><span class="line">        hash = 470635019,</span><br><span class="line">        len = 4</span><br><span class="line">      &#125;,</span><br><span class="line">      hash_len = 17650504203</span><br><span class="line">    &#125;,</span><br><span class="line">    name = 0xff3c58dfc3560b78 &quot;null&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  d_inode = 0xff3c58e27544e490,</span><br></pre></td></tr></table></figure>
+<h4 id="Display-member-offset"><a href="#Display-member-offset" class="headerlink" title="Display member offset"></a>Display member offset</h4><p>Command: struct struct_name -o[x]<br>Purpose: Display the offet of every member of a structure instance, the option ‘x’ is used to show offsets with hex , decimal values by defaut. The values of offsets are useful when disassembling code, which help understand data&#x2F;code flow.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; struct dentry -xo</span><br><span class="line">struct dentry &#123;</span><br><span class="line">   [0x0] unsigned int d_flags;</span><br><span class="line">   [0x4] seqcount_spinlock_t d_seq;</span><br><span class="line">   [0x8] struct hlist_bl_node d_hash;</span><br><span class="line">  [0x18] struct dentry *d_parent;</span><br><span class="line">  [0x20] struct qstr d_name;</span><br><span class="line">  [0x30] struct inode *d_inode;</span><br><span class="line">  [0x38] unsigned char d_iname[32];</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line">SIZE: 0xc0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="Display-specific-members"><a href="#Display-specific-members" class="headerlink" title="Display specific members"></a>Display specific members</h4><p>Command: struct struct_name.member[,member] address<br>Purpose: Display a&#x2F;multiple member[s] of a structure instance<br>Some structures have many members to show, so only showing part of them would be more readable.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; struct dentry.d_parent,d_iname ff3c58dfd0c492c0</span><br><span class="line">  d_parent = 0xff3c58d8475e8b40,</span><br><span class="line">  d_iname = &quot;mountinfo\000\304P\350\001\062\377\000\223\304P\350\001\062\377\020\223\304P\350\001\062&quot;,</span><br></pre></td></tr></table></figure>
+
+<h4 id="Display-struct-for-per-cpu"><a href="#Display-struct-for-per-cpu" class="headerlink" title="Display struct for per cpu"></a>Display struct for per cpu</h4><p>Command: struct struct_name address:a<br>Purpose: Display a specific percpu struture data. If you want to show all cpu data, use ‘a’ instead after the colon.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; struct irq_cpustat_t irq_stat:0</span><br><span class="line">struct irq_cpustat_t &#123;</span><br><span class="line">  kvm_cpu_l1tf_flush_l1d = 1 &#x27;\001&#x27;,</span><br><span class="line">  __nmi_count = 3425,</span><br><span class="line">  apic_timer_irqs = 152104309,</span><br><span class="line">  irq_spurious_count = 0,</span><br><span class="line">  icr_read_retry_count = 0,</span><br><span class="line">  kvm_posted_intr_ipis = 203414,</span><br><span class="line">  kvm_posted_intr_wakeup_ipis = 0,</span><br><span class="line">  kvm_posted_intr_nested_ipis = 0,</span><br><span class="line">  x86_platform_ipis = 0,</span><br><span class="line">  apic_perf_irqs = 3424,</span><br><span class="line">  apic_irq_work_irqs = 5,</span><br><span class="line">  irq_resched_count = 4115904,</span><br><span class="line">  irq_call_count = 67919631,</span><br><span class="line">  irq_tlb_count = 36597292,</span><br><span class="line">  irq_thermal_count = 0,</span><br><span class="line">  irq_threshold_count = 0,</span><br><span class="line">  irq_deferred_error_count = 0,</span><br><span class="line">  irq_hv_callback_count = 0,</span><br><span class="line">  irq_hv_reenlightenment_count = 0,</span><br><span class="line">  hyperv_stimer0_count = 0</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="Process"><a href="#Process" class="headerlink" title="Process"></a>Process</h3><h4 id="Find-the-longest-blocked-process"><a href="#Find-the-longest-blocked-process" class="headerlink" title="Find the longest blocked process"></a>Find the longest blocked process</h4><p>Command: ps -m | grep UN<br>Purpose: This method is useful when meeting hung task issue. We need to know which process got blocked first, why couldn’t not gain the lock, get the owner(another process) of lock, and then check more info from the owner.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; ps -m | grep UN</span><br><span class="line">[0 00:50:23.874] [UN]  PID: 32195    TASK: ffff951905698000  CPU: 2    COMMAND: &quot;sadc&quot;</span><br><span class="line">[0 06:50:23.483] [UN]  PID: 31474    TASK: ffff951903445180  CPU: 3    COMMAND: &quot;sadc&quot;</span><br><span class="line">[0 20:03:39.980] [UN]  PID: 2243     TASK: ffff951a3f5cd180  CPU: 0    COMMAND: &quot;df&quot;</span><br><span class="line">[0 20:04:45.240] [UN]  PID: 2027     TASK: ffff951902195180  CPU: 1    COMMAND: &quot;df&quot;</span><br><span class="line">[0 20:10:22.931] [UN]  PID: 1972     TASK: ffff951900dea8c0  CPU: 2    COMMAND: &quot;sadc&quot;</span><br><span class="line">[0 20:12:35.233] [UN]  PID: 1960     TASK: ffff951a3f5c0000  CPU: 1    COMMAND: &quot;mount.cifs&quot;</span><br><span class="line">[0 20:12:57.731] [UN]  PID: 1958     TASK: ffff9519105d28c0  CPU: 1    COMMAND: &quot;ls&quot;</span><br><span class="line">[0 20:13:35.849] [UN]  PID: 736      TASK: ffff9519185228c0  CPU: 0    COMMAND: &quot;kworker/0:3&quot;</span><br><span class="line">crash&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="Traverse-a-specific-member-of-processes"><a href="#Traverse-a-specific-member-of-processes" class="headerlink" title="Traverse a specific member of processes"></a>Traverse a specific member of processes</h4><p>Command: foreach task -R fs<br>Purpose: Traverse the fs member fo all processes</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; foreach task -R fs</span><br><span class="line">PID: 0        TASK: ffffffffba40f2c0  CPU: 0    COMMAND: &quot;swapper/0&quot;</span><br><span class="line">  fs = 0xffffffffba5fffc0 &lt;init_fs&gt;,</span><br><span class="line"></span><br><span class="line">PID: 0        TASK: ffff9519003228c0  CPU: 1    COMMAND: &quot;swapper/1&quot;</span><br><span class="line">  fs = 0xffff951900329580,</span><br><span class="line"></span><br><span class="line">PID: 0        TASK: ffff951900325180  CPU: 2    COMMAND: &quot;swapper/2&quot;</span><br><span class="line">  fs = 0xffff951900329140,</span><br><span class="line"></span><br><span class="line">PID: 0        TASK: ffff951900320000  CPU: 3    COMMAND: &quot;swapper/3&quot;</span><br><span class="line">  fs = 0xffff951900329a80,</span><br><span class="line"></span><br><span class="line">PID: 1        TASK: ffff951900235180  CPU: 2    COMMAND: &quot;systemd&quot;</span><br><span class="line">  fs = 0xffffffffba5fffc0 &lt;init_fs&gt;,</span><br><span class="line"></span><br><span class="line">PID: 2        TASK: ffff951900230000  CPU: 3    COMMAND: &quot;kthreadd&quot;</span><br><span class="line">  fs = 0xffffffffba5fffc0 &lt;init_fs&gt;,</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h4 id="Check-process-memory-utilization"><a href="#Check-process-memory-utilization" class="headerlink" title="Check process memory utilization"></a>Check process memory utilization</h4><p>Command: ps …<br>Purpose: It’s useful when meeting memory usage issues</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; ps -G | tail -n +2 | cut -b2- | gawk &#x27;&#123;mem += $8&#125; END &#123;print &quot;total &quot;mem/1048576 &quot;GB&quot;&#125;&#x27;</span><br><span class="line">total 0.401539GB</span><br></pre></td></tr></table></figure>
+<h3 id="Iterate-list"><a href="#Iterate-list" class="headerlink" title="Iterate list"></a>Iterate list</h3><p>put a list_head pointer to “list” command directly can list all next or prev pointers but only can be used to count the number of node in the list.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">crash&gt;structure dentry.d_child ffff95190174b540</span><br><span class="line">  d_child = &#123;</span><br><span class="line">    next = 0xffff95190174b090,</span><br><span class="line">    prev = 0xffff95190048ab10</span><br><span class="line">  &#125;,</span><br><span class="line">crash&gt; list 0xffff95190174b090 | wc -l</span><br><span class="line">201</span><br></pre></td></tr></table></figure>
+
+<h4 id="List-the-struct-that-own-an-list-head"><a href="#List-the-struct-that-own-an-list-head" class="headerlink" title="List the struct that own an list_head"></a>List the struct that own an list_head</h4><p>Purpose: Sometimes you want to show specific members inside of a structure during traverse a list, this method can do this job:</p>
+<ol>
+<li>Get the address for every dentry.<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; files 1</span><br><span class="line">PID: 1        TASK: ff3c58d8401f4000  CPU: 26   COMMAND: &quot;systemd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line">[... snip ...]</span><br><span class="line"> 16 ff3c58dfcb053e00 ff3c58dfd0c492c0 ff3c58d849cece28 REG  /proc/1/mountinfo</span><br></pre></td></tr></table></figure></li>
+<li>We have the first dentry address ff3c58dfd0c492c0, then list all instances in the list and show a specific member<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; list -o dentry.d_child -s dentry.d_name.name -h ffff95190174b540</span><br><span class="line">ffff95190174b540</span><br><span class="line">  d_name.name = 0xffff95190174b578 &quot;rfkill&quot;</span><br><span class="line">ffff95190174b000</span><br><span class="line">  d_name.name = 0xffff95190174b038 &quot;uhid&quot;</span><br><span class="line">ffff95190174f240</span><br><span class="line">  d_name.name = 0xffff95190174f278 &quot;mapper&quot;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="List-the-struct-that-own-a-next-element-pointer"><a href="#List-the-struct-that-own-a-next-element-pointer" class="headerlink" title="List the struct that own a next element pointer"></a>List the struct that own a next element pointer</h4><p>Purpuse: Sometime there is no a list_head object embedded in the structure, but a simple pointer that points to the next element instead, then we pass the next pointer directly.</p>
+<ol>
+<li>get the pointer member name<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; struct dentry | grep dentry</span><br><span class="line">struct dentry &#123;</span><br><span class="line">    struct dentry *d_parent;</span><br><span class="line">    const struct dentry_operations *d_op;</span><br></pre></td></tr></table></figure></li>
+<li>Traverse the list<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; list dentry.d_parent ff3c58dfd0c492c0</span><br><span class="line">ff3c58dfd0c492c0</span><br><span class="line">ff3c58d8475e8b40</span><br><span class="line">ff3c58d8475e9a40</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="List-all-tasks-that-opened-same-file"><a href="#List-all-tasks-that-opened-same-file" class="headerlink" title="List all tasks that opened same file"></a>List all tasks that opened same file</h4><p>Command: foreach files -R address_of_file_object<br>Purpose: List all references of a file through a file object address.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; foreach files -R ffff95195d72dd00</span><br><span class="line">PID: 32298    TASK: ffff9519002aa8c0  CPU: 3    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line">  9 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"></span><br><span class="line">PID: 32304    TASK: ffff9519002ad180  CPU: 3    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line"> 12 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 16 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 17 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br></pre></td></tr></table></figure>
+<p>foreach files -R absolute_file_path</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; foreach files -R /dev/ptmx</span><br><span class="line">PID: 32298    TASK: ffff9519002aa8c0  CPU: 3    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line">  9 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"></span><br><span class="line">PID: 32304    TASK: ffff9519002ad180  CPU: 3    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line"> 12 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 16 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 17 ffff95195d72dd00 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"></span><br><span class="line">PID: 32404    TASK: ffff9519003d8000  CPU: 3    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line">  9 ffff951903e4c100 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"></span><br><span class="line">PID: 32407    TASK: ffff9519056aa8c0  CPU: 0    COMMAND: &quot;sshd&quot;</span><br><span class="line">ROOT: /    CWD: /</span><br><span class="line"> FD       FILE            DENTRY           INODE       TYPE PATH</span><br><span class="line"> 12 ffff951903e4c100 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 16 ffff951903e4c100 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br><span class="line"> 17 ffff951903e4c100 ffff951901489cc0 ffff951900eaf108 CHR  /dev/ptmx</span><br></pre></td></tr></table></figure>
+<h3 id="Files"><a href="#Files" class="headerlink" title="Files"></a>Files</h3><h4 id="Find-out-a-file-path"><a href="#Find-out-a-file-path" class="headerlink" title="Find out a file path"></a>Find out a file path</h4><p>Purpose: Get the absolute path of a file through a dentry instance.</p>
+<ol>
+<li>get the dentry address from memory<br>Generally, if open syscall is called, there would have some dentry is save on the stack of the current process. To address which file is getting accessed, we need to get the relevant dentry address first.</li>
+<li>files -d dentry_address<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; files -d  ffff95194f8739c0</span><br><span class="line">     DENTRY           INODE           SUPERBLK     TYPE PATH</span><br><span class="line">ffff95194f8739c0 ffff9519043eded8 ffff95190550e000 FIFO /run/systemd/sessions/7.ref</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="Traverse-pointer-member-of-structure"><a href="#Traverse-pointer-member-of-structure" class="headerlink" title="Traverse pointer member of structure"></a>Traverse pointer member of structure</h4><p>Purpose: It’s easy to read pointer that is a member of structure, but what if we want read the pointer member for multiple structure instances? First we need to dump all pointers, then save all data as a file, every line is a command that can be execute in crash tool. The following example illustrate how to crash input to do the job.</p>
+<ol>
+<li><p>Get which pointer member that we want to check out for all instances, then save them info a file.  The member is fs_struct.root and save all of them into fs_addr file in this example.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; foreach task -R fs | grep &#x27;fs =&#x27; | awk &#x27;&#123;print &quot;* fs_struct.root&quot;,$3&#125;&#x27; &gt; fs_addr</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Input fs_addr file with ‘&lt;’ </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; &lt; fs_addr</span><br><span class="line">crash&gt; * fs_struct.root 0xffffffff89142920</span><br><span class="line">  root = &#123;</span><br><span class="line">    mnt = 0xffffa0b9a82be020,</span><br><span class="line">    dentry = 0xffffa0b9b2204180</span><br><span class="line">  &#125;,</span><br><span class="line">crash&gt; * fs_struct.root 0xffffa0ab4103f6c0,</span><br><span class="line">  root = &#123;</span><br><span class="line">    mnt = 0xffffa0ab417438e0,</span><br><span class="line">    dentry = 0xffffa0ab47804a80</span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2025/06/11/kernel/Understand%20Kernel%20Panic/"
+                                   title="Understand Linux kernel Oops/Panic"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Understand Linux kernel Oops/Panic</span>
+                                        <span class="post-nav-item">Prev posts</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/01/06/kernel/read_assembly_on_x86_64/"
+                                   title="How to read assembly and stack data on x86_64"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">How to read assembly and stack data on x86_64</span>
+                                        <span class="post-nav-item">Next posts</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        Powered by&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;&&nbsp;Theme&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
