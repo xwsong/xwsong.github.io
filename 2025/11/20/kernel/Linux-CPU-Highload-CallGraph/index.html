@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-THGBSNJZKP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-THGBSNJZKP');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Keep Team">
+    
+    <title>
+        
+            CPU高负载之CallGraph最佳实践 |
+        
+        XW&#39;s blog
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/logo.svg">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"en"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#0066cc","title":"XW's blog","author":"Keep Team","avatar":"/images/avatar.svg","logo":"/images/logo.svg","favicon":"/images/logo.svg"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":false,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":false},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":false,"percent":false,"hide_header":true},"home":{"announcement":null,"category":false,"tag":false,"post_datetime":"updated"},"post":{"author_badge":{"enable":true,"level_badge":true,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY-MM-DD HH:mm:ss","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":false,"style":"default"},"highlight_theme":"default"},"toc":{"enable":false,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":false,"page_pv":false}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":false},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2020,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"google_analytics":{"tracking_id":"G-THGBSNJZKP","only_pageview":false},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"}
+    KEEP.language_code_block = {"copy":"Copy code","copied":"Copied","fold":"Fold code block","folded":"Folded"}
+    KEEP.language_copy_copyright = {"copy":"Copy copyright info","copied":"Copied","title":"Original post title","author":"Original post author","link":"Original post link"}
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+                <a class="logo-image border-box" href="/">
+                    <img src="/images/logo.svg">
+                </a>
+            
+            <a class="site-name border-box" href="/">
+               XW&#39;s blog
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                HOME
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                ARCHIVES
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            HOME
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            ARCHIVES
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        CPU高负载之CallGraph最佳实践
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/avatar.svg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Xiongwei Song &lt;sxwbruce@gmail.com&gt;</span>
+                                
+                                    <span class="author-badge">Lv1</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2025-11-20 00:00:00</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date">
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Nov 24 2025 21:56:59 GMT+0800">2025-11-24 21:56:59</span>
+                </span>
+            
+        
+
+        
+
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="meta-info-item post-pv" style="font-size: 10px;display: inline-block;"><i class="icon fas fa-eye"></i>"&nbsp";<span id="busuanzi_value_page_pv">2065</span></span>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h1 id="CPU高负载之CallGraph最佳实践"><a href="#CPU高负载之CallGraph最佳实践" class="headerlink" title="CPU高负载之CallGraph最佳实践"></a>CPU高负载之CallGraph最佳实践</h1><h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1 简介"></a>1 简介</h2><p>在Linux系统中当遇到CPU高负载的问题时，我们应该怎么去分析呢？最直接有效的方式就是收集进程或执行函数的callgraph，查找到程序执行的热点路径，然后理解代码实现并进行优化。callgraph是程序在执行的过程过调用过的函数集合，包括深度与广度层面。通过对调用路径的统计我们可以知道哪些函数调用过度消耗了CPU时间。Linux中的可以收集callgraph的工具有很多，这里主要介绍ftrace, perf-record和bcc-profile三种工具的收集callgraph的原理以及实例, 并进行对比。其它工具还有例如systemtap和lTTng等，似乎比较小众，至少在我工作过的环境中用的并不多，所以不在这里进行介绍。</p>
+<h2 id="2-ftrace收集callgraph的原理及实例"><a href="#2-ftrace收集callgraph的原理及实例" class="headerlink" title="2 ftrace收集callgraph的原理及实例"></a>2 ftrace收集callgraph的原理及实例</h2><h3 id="2-1-原理"><a href="#2-1-原理" class="headerlink" title="2.1 原理"></a>2.1 原理</h3><p>ftrace实现对函数的跟踪调用使用的是gcc的function profiler(mcount)功能。gcc有一个内建的函数mcount()专门用来跟踪函数的调用，实现对调用路径的记录。</p>
+<p>在编译内核时，如果设置了CONFIG_DYNAMIC_FTRACE选项 , 编译器会在每个函数的入口除留一条nopl指令，用于给mcount的调用占位，英文术语stub。 由于nop指令什么也不做，所以此时对内核来说没有任何额外的性能消耗。一旦在内核运行时设置ftrace的function_graph功能，内核会把函数入口的nop指令替换成call指令调用mcount函数，在函数执行时mcount会记录函数的调用过程，实现callgraph的功能。下面对设置function_graph前后的__x64_sys_read()反汇编，可以直观的看到这一点。</p>
+<p>在设置function_graph前__x64_sys_read()的汇编如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; dis __x64_sys_read</span><br><span class="line"><span class="number">0xffffffff83bfcf00</span> &lt;__x64_sys_read&gt;:    nopl   <span class="number">0x0</span>(%rax,%rax,<span class="number">1</span>) [FTRACE NOP]</span><br><span class="line"><span class="number">0xffffffff83bfcf05</span> &lt;__x64_sys_read+<span class="number">5</span>&gt;:  mov    <span class="number">0x60</span>(%rdi),%rdx</span><br><span class="line"><span class="number">0xffffffff83bfcf09</span> &lt;__x64_sys_read+<span class="number">9</span>&gt;:  mov    <span class="number">0x68</span>(%rdi),%rsi</span><br><span class="line"><span class="number">0xffffffff83bfcf0d</span> &lt;__x64_sys_read+<span class="number">13</span>&gt;: mov    <span class="number">0x70</span>(%rdi),%rdi</span><br><span class="line"><span class="number">0xffffffff83bfcf11</span> &lt;__x64_sys_read+<span class="number">17</span>&gt;: jmp    <span class="number">0xffffffff83bfce10</span> &lt;ksys_read&gt;</span><br></pre></td></tr></table></figure>
+<p>第一条指令是nopl，就是空操作，前面说了不回对系统性能有任何负面影响。然而如果设置&#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing&#x2F;current_tracer的值为function_graph。再反汇编_x64_sys_read()，得到如下内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crash&gt; dis __x64_sys_read</span><br><span class="line"><span class="number">0xffffffff83bfcf00</span> &lt;__x64_sys_read&gt;:    call   <span class="number">0xffffffffc1349000</span></span><br><span class="line"><span class="number">0xffffffff83bfcf05</span> &lt;__x64_sys_read+<span class="number">5</span>&gt;:  mov    <span class="number">0x60</span>(%rdi),%rdx</span><br><span class="line"><span class="number">0xffffffff83bfcf09</span> &lt;__x64_sys_read+<span class="number">9</span>&gt;:  mov    <span class="number">0x68</span>(%rdi),%rsi</span><br><span class="line"><span class="number">0xffffffff83bfcf0d</span> &lt;__x64_sys_read+<span class="number">13</span>&gt;: mov    <span class="number">0x70</span>(%rdi),%rdi</span><br><span class="line"><span class="number">0xffffffff83bfcf11</span> &lt;__x64_sys_read+<span class="number">17</span>&gt;: jmp    <span class="number">0xffffffff83bfce10</span> &lt;ksys_read&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到第一条指令被替换成了call指令，调用起始地址为0xffffffffc1349000，所以每个函数在执行时都额外增加了一个函数调用，导致内核性能下降明显。</p>
+<h3 id="2-2-用ftrace收集callgraph的实例"><a href="#2-2-用ftrace收集callgraph的实例" class="headerlink" title="2.2 用ftrace收集callgraph的实例"></a>2.2 用ftrace收集callgraph的实例</h3><p>使用如下步骤可以用ftrace收集callgraph日志</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先关闭ftrace，并清空ring buffer</span></span><br><span class="line"><span class="built_in">echo</span>  0  &gt;  /sys/kernel/debug/tracing/tracing_on</span><br><span class="line"><span class="built_in">echo</span>  <span class="string">&quot;&quot;</span>  &gt;  /sys/kernel/debug/tracing/trace</span><br><span class="line"><span class="comment"># 打开function_graph功能</span></span><br><span class="line"><span class="built_in">echo</span>  function_graph &gt;  /sys/kernel/debug/tracing/current_tracer</span><br><span class="line"><span class="comment"># 输入要跟踪的进程ID</span></span><br><span class="line"><span class="built_in">echo</span>  <span class="variable">$pid</span>  &gt;  /sys/kernel/debug/tracing/set_ftrace_pid</span><br><span class="line"><span class="comment"># 打开ftrace</span></span><br><span class="line"><span class="built_in">echo</span>  1  &gt;  /sys/kernel/debug/tracing/tracing_on</span><br></pre></td></tr></table></figure>
+
+<p>下面是ftrace跟踪系统调用read的调用过程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">26</span>)               |  __x64_sys_read() &#123;</span><br><span class="line"><span class="number">26</span>)               |    ksys_read() &#123;</span><br><span class="line"><span class="number">26</span>)               |      __fdget_pos() &#123;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.275</span> us    |        __fget_light();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.952</span> us    |      &#125;</span><br><span class="line"><span class="number">26</span>)               |      vfs_read() &#123;</span><br><span class="line"><span class="number">26</span>)               |        rw_verify_area() &#123;</span><br><span class="line"><span class="number">26</span>)               |          security_file_permission() &#123;</span><br><span class="line"><span class="number">26</span>)               |            apparmor_file_permission() &#123;</span><br><span class="line"><span class="number">26</span>)               |              common_file_perm() &#123;</span><br><span class="line"><span class="number">26</span>)               |                aa_file_perm() &#123;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.271</span> us    |                  __rcu_read_lock();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.251</span> us    |                  __rcu_read_unlock();</span><br><span class="line"><span class="number">26</span>)   <span class="number">1.448</span> us    |                &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">2.141</span> us    |              &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">2.757</span> us    |            &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.268</span> us    |            bpf_lsm_file_permission();</span><br><span class="line"><span class="number">26</span>)   <span class="number">4.983</span> us    |          &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">5.689</span> us    |        &#125;</span><br><span class="line"><span class="number">26</span>)               |        inotify_read() &#123;</span><br><span class="line"><span class="number">26</span>)               |          add_wait_queue() &#123;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.283</span> us    |            _raw_spin_lock_irqsave();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.326</span> us    |            _raw_spin_unlock_irqrestore();</span><br><span class="line"><span class="number">26</span>)   <span class="number">1.495</span> us    |          &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.277</span> us    |          _raw_spin_lock();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.266</span> us    |          fsnotify_peek_first_event();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.293</span> us    |          fsnotify_remove_first_event();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.254</span> us    |          _raw_spin_unlock();</span><br><span class="line"><span class="number">26</span>)               |          fsnotify_destroy_event() &#123;</span><br><span class="line"><span class="number">26</span>)               |            fsnotify_destroy_event.part<span class="number">.5</span>() &#123;</span><br><span class="line"><span class="number">26</span>)               |              inotify_free_event() &#123;</span><br><span class="line"><span class="number">26</span>)               |                kfree() &#123;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.572</span> us    |                  __kmem_cache_free();</span><br><span class="line"><span class="number">26</span>)   <span class="number">1.409</span> us    |                &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">1.965</span> us    |              &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">2.937</span> us    |            &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">3.547</span> us    |          &#125;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.266</span> us    |          _raw_spin_lock();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.314</span> us    |          fsnotify_peek_first_event();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.269</span> us    |          _raw_spin_unlock();</span><br><span class="line"><span class="number">26</span>)               |          remove_wait_queue() &#123;</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.321</span> us    |            _raw_spin_lock_irqsave();</span><br><span class="line"><span class="number">26</span>)   <span class="number">0.301</span> us    |            _raw_spin_unlock_irqrestore();</span><br><span class="line"><span class="number">26</span>)   <span class="number">1.469</span> us    |          &#125;</span><br><span class="line"><span class="number">26</span>) + <span class="number">12.257</span> us   |        &#125;</span><br><span class="line"><span class="number">26</span>) + <span class="number">19.153</span> us   |      &#125;</span><br><span class="line"><span class="number">26</span>) + <span class="number">21.253</span> us   |    &#125;</span><br><span class="line"><span class="number">26</span>) + <span class="number">21.921</span> us   |  &#125;</span><br></pre></td></tr></table></figure>
+<p>其中前面有符号的记录代表对应的调用消耗比较大， 例如在例子中有的前面有’+’，表示那个调用消耗超过10微秒。其它符号对应不同的时间量级，具体如下：</p>
+<ul>
+<li>‘$’ - greater than 1 second </li>
+<li>‘@’ - greater than 100 millisecond</li>
+<li>‘*’ - greater than 10 millisecond</li>
+<li>‘#’ - greater than 1000 microsecond</li>
+<li>‘!’ - greater than 100 microsecond</li>
+<li>‘+’ - greater than 10 microsecond</li>
+<li>‘ ‘ - less than or equal to 10 microsecond.</li>
+</ul>
+<p><a class="link"   target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/v6.0/trace/ftrace.html" >更多ftrace信息参考<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="3-perf-record收集callgraph原理以及使用实例"><a href="#3-perf-record收集callgraph原理以及使用实例" class="headerlink" title="3 perf-record收集callgraph原理以及使用实例"></a>3 perf-record收集callgraph原理以及使用实例</h2><h3 id="3-1-原理"><a href="#3-1-原理" class="headerlink" title="3.1 原理"></a>3.1 原理</h3><p>perf record是基于PMU(Performance Monitor Unit)实现的事件采样。PMU在主流架构的处理器上都被支持，本质上是一组计数器组成。当计数器归零时(溢出overflow)，CPU会产生一个中断，每次PMU driver处理该中断时，内核可以记录程序的执行的指令位置、两次中断之间的时钟数、或者cache miss的次数、或者指令预测错误的统计等。基于这些信息，可以发现程序执行过程中的性能瓶颈。[1][2]</p>
+<p>perf-record解栈的方式主要有3中，frame pointer, dwarf和lbr。</p>
+<p>frame pointer是用CPU的寄存器实现对每个栈帧边界的记录，以x86_64为例，rbp寄存器用来记录上一帧rsp的值。每次发生函数调用的时候，把调用者的rsp的值保存到rbp中，然后再用sub命令扩展栈空间，rsp始终指向栈顶。在使能frame pointer的情况下，rbp专门用于记录栈的边界；然而为了提高程序性能，有些程序在编译时用gcc&#x2F;clang的编译选项-fno-omit-frame-pointer关闭此功能，把rbp作为通用寄存器使用而不是记录栈，此时无法使用fp的方式进行解栈。所以dwarf的方案派上了用场。</p>
+<p>dwarf使用CFI(Call Frame Information)规则进行站回溯。通过CFI可以回溯前面栈帧的任何指令执行时寄存器的值。它存储所有的信息到一个表中，包括程序计数、所有的寄存器和执行位置。CFI可以提供丰富的信息，可以回溯内联函数，但是在性能上低于fp方式，可靠性高于fp。[3][4]</p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://lwn.net/Articles/680985/" >Last Branch Record (LBR)<i class="fas fa-external-link-alt"></i></a>, LBR功能由一些比较新的Intel处理器支持。它使用CPU内部的一组寄存器保留代码执行路径，用于回溯程序的执行过程，所以性能损耗相当低。缺点是由于是硬件特性，并不支持虚拟机，而且只有Intel的CPU支持。并且对栈中的函数调用深度的记录是有限的。所以只推荐在特定的机器上使用此方式进行栈回溯。</p>
+<h3 id="3-2-用perf收集callgraph"><a href="#3-2-用perf收集callgraph" class="headerlink" title="3.2 用perf收集callgraph"></a>3.2 用perf收集callgraph</h3><p>使用如下perf命令抓取程序的callgraph:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">perf record -a -g --call-graph &lt;method&gt; &lt;command_to_profile&gt;</span><br><span class="line">或</span><br><span class="line">perf record -a -g --call-graph &lt;method&gt; -p &lt;pid&gt; </span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong><code>record</code></strong>: perf的子命令，对程序的执行进行采样。</li>
+<li><strong><code>-a</code></strong>: 记录发生所有CPU上的执行过程 (自Linux 4.11不再需要)。</li>
+<li><strong><code>-g</code></strong>: 记录用户空间和内核空间的调用链。</li>
+<li><strong><code>--call-graph</code> &lt;format&gt;</strong>: 指定解栈方式(fp, dwarf或lbr)。</li>
+<li><strong><code>-p</code></strong>: 要跟踪进程的pid。</li>
+<li><strong><code>&lt;command_to_profile&gt;</code></strong>: 要执行的命令，可以跟踪一个程序执行的完整的生命周期，与<code>-p</code>选项二选一。</li>
+</ul>
+<p>在收集callgraph后，使用perf-report读取采样数据，具体如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perf report -i &lt;perf-data&gt;--stdio -g</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>report</strong>： perf的子命令，用于读取采样数据。</li>
+<li><strong>-i</strong>：指定data文件路径， <perf-data>表示给出的路径信息。</li>
+<li><strong>–stdio</strong>：样本解析后输出到标准输出。</li>
+<li><strong>-g</strong>：样本解析为callgraph。</li>
+</ul>
+<p>下面是具体抓取callgraph的步骤</p>
+<ol>
+<li>创建测试脚本cat.sh<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">    <span class="built_in">cat</span> /home/brucesong/workspace/debug.patch &gt; /dev/null</span><br><span class="line">    <span class="built_in">sleep</span> 1</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></li>
+<li>获取进程pid<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root        5003  0.0  0.0 231068  3496 pts/0    S+   20:47   0:00 /bin/bash ./cat.sh</span><br></pre></td></tr></table></figure></li>
+<li>执行perf命令<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perf record -a -g --call-graph dwarf -p 5003 -o /tmp/cat.data <span class="built_in">sleep</span> 30</span><br></pre></td></tr></table></figure></li>
+</ol>
+<ul>
+<li><strong>-o</strong>: 选项可以指定data文件的存储路径</li>
+<li><strong>sleep 30</strong>: perf命令执行30秒</li>
+</ul>
+<ol start="4">
+<li>解析perf data<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perf report -i /tmp/cat.data  --stdio -g</span><br></pre></td></tr></table></figure>
+下面是其中一小部分解析后的采样数据，由于数据太多只截取了其中一小部分：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"># To display the perf.data header info, please use --header/--header-only options.</span><br><span class="line">#           </span><br><span class="line">#     </span><br><span class="line"># Total Lost Samples: 0</span><br><span class="line">#    </span><br><span class="line"># Samples: 704  of event &#x27;cycles:P&#x27;</span><br><span class="line"># Event count (approx.): 103802591</span><br><span class="line">#</span><br><span class="line"># Children      Self  Command  Shared Object         Symbol                                         </span><br><span class="line"># ........  ........  .......  ....................  ...............................................</span><br><span class="line">#     </span><br><span class="line">    45.06%     0.00%  cat.sh   bash                  [.] _start</span><br><span class="line">            |</span><br><span class="line">            ---_start</span><br><span class="line">               __libc_start_main@@GLIBC_2.34</span><br><span class="line">               __libc_start_call_main</span><br><span class="line">               main</span><br><span class="line">               reader_loop</span><br><span class="line">               execute_command</span><br><span class="line">               execute_command_internal</span><br><span class="line">               execute_while_or_until.lto_priv.0</span><br><span class="line">               execute_command</span><br><span class="line">               |</span><br><span class="line">               |--44.16%--execute_command_internal   </span><br><span class="line">[...]</span><br><span class="line">     0.59%     0.59%  cat.sh   [kernel.kallsyms]     [k] get_and_clear_full_ptes.isra.0</span><br><span class="line">            |</span><br><span class="line">            ---__GI___execve</span><br><span class="line">               entry_SYSCALL_64_after_hwframe</span><br><span class="line">               do_syscall_64</span><br><span class="line">               __x64_sys_execve</span><br><span class="line">               do_execveat_common.isra.0</span><br><span class="line">               bprm_execve.part.0</span><br><span class="line">               exec_binprm</span><br><span class="line">               load_elf_binary</span><br><span class="line">               begin_new_exec</span><br><span class="line">               exec_mmap</span><br><span class="line">               __mmput</span><br><span class="line">               exit_mmap</span><br><span class="line">               unmap_vmas</span><br><span class="line">               unmap_page_range</span><br><span class="line">               zap_pud_range.isra.0</span><br><span class="line">               zap_pmd_range.isra.0</span><br><span class="line">               zap_pte_range</span><br><span class="line">               zap_present_ptes.constprop.0</span><br><span class="line">               folio_remove_rmap_ptes</span><br></pre></td></tr></table></figure></li>
+<li>生成火焰图<br>可以用大神Brendan Gregg写的工具FlameGraph把采样数据转换成可视化模式，这样看起来会更直观。步骤如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">perf script -i /tmp/cat.data | ./stackcollapse-perf.pl &gt; /tmp/cat.folded</span><br><span class="line">./flamegraph.pl /tmp/cat.folded &gt; /tmp/cat.svg</span><br></pre></td></tr></table></figure>
+<img   src="https://gitlab.com/xwsong/picture-store/-/raw/main/blog_posts/callgraph/perf/cat-flamegraph.png?ref_type=heads"  alt="The flamegraph of cat.sh"><br><a class="link"   target="_blank" rel="noopener" href="https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html" >https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html<i class="fas fa-external-link-alt"></i></a></li>
+</ol>
+<h2 id="4-bcc-profile收集callgraph的原理以及使用实例"><a href="#4-bcc-profile收集callgraph的原理以及使用实例" class="headerlink" title="4 bcc-profile收集callgraph的原理以及使用实例"></a>4 bcc-profile收集callgraph的原理以及使用实例</h2><h3 id="4-1-原理"><a href="#4-1-原理" class="headerlink" title="4.1 原理"></a>4.1 原理</h3><p>bcc-profile(脚本路径&#x2F;usr&#x2F;share&#x2F;bcc&#x2F;tools&#x2F;profile)也是基于perf event，也就是基于PMU(Performance Monitor Unit)实现的事件采样。但是它通过ebpf程序收集程序计数器。bcc-profile在收集程序的调用路径时，只把样本中每一个callstack和对应的数量发送到用户空间，减少了从内核到用户空间的数据传递。</p>
+<p>对于perf来说，它会把每一次的callstack样本记录下来并将数据记录到ring buffer，然后发送到用户空间保存到perf data文件中。所以bcc-profile相对于perf-record来说对系统的性能影响要小很多。</p>
+<h3 id="4-2-使用bcc-profile收集callgraph"><a href="#4-2-使用bcc-profile收集callgraph" class="headerlink" title="4.2 使用bcc-profile收集callgraph"></a>4.2 使用bcc-profile收集callgraph</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/share/bcc/tools/profile -<span class="built_in">df</span> -F &lt;sampling frequency&gt; &lt;duration&gt; -p &lt;pid&gt; &gt; xxx.folded</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong><code>-d</code></strong>: 同时追踪用户态和内核态。</li>
+<li><strong><code>-f</code></strong>: 输出为火焰图所需的折叠格式。</li>
+<li><strong><code>-F &lt;sampling frequency&gt;</code></strong>: 指定 99 Hz 采样频率。 </li>
+<li><strong><code>&lt;duration&gt;</code></strong>: 设置采样时长，以秒为单位。</li>
+<li><strong><code>-p &lt;pid&gt;</code></strong>:  传入进程ID。</li>
+<li><strong><code>&gt; xxx.folded</code></strong>: 将结果重定向到一个文件。</li>
+</ul>
+<p>下面时用bcc-profile收集callgraph的实例[5]:</p>
+<ol>
+<li>收集1号进程systemd的callgraph<br>&#x2F;usr&#x2F;share&#x2F;bcc&#x2F;tools&#x2F;profile -df -F 999 30 -p 1 &gt; &#x2F;tmp&#x2F;cat.folded</li>
+<li>下载FlameGraph，然后生成火焰图<br>git clone <a class="link"   target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph.git" >https://github.com/brendangregg/FlameGraph.git<i class="fas fa-external-link-alt"></i></a><br>.&#x2F;flamegraph.pl &#x2F;tmp&#x2F;cat.folded &gt; ..&#x2F;ebpf&#x2F;cat-profile.svg</li>
+<li>火焰图如下：<br><img   src="https://gitlab.com/xwsong/picture-store/-/raw/main/blog_posts/callgraph/ebpf/cat-profile.png?ref_type=heads"  alt="The flame graph generated from the data collected via bcc-profile"></li>
+</ol>
+<p>bcc-profile需要Linux内核ebpf的BPF_PROG_TYPE_PERF_EVENT特性的支持，此功能自从Linux 4.9引入。</p>
+<h3 id="5-对比ftrace-perf-record和bcc-profile"><a href="#5-对比ftrace-perf-record和bcc-profile" class="headerlink" title="5 对比ftrace, perf-record和bcc-profile"></a>5 对比ftrace, perf-record和bcc-profile</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ftrace</th>
+<th>perf-record</th>
+<th>bcc-profile</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原理</td>
+<td>mcount需要编译器的支持。在打开function_graph时，每个函数入口添加call(x86_64)指令调用mcount函数进行记录</td>
+<td>基于PMU的perf_event子系统实现，每个stacktrace样本都从内核空间传输到用户空间</td>
+<td>基于PMU的perf_event子系统实现，但是传输的数据量相对perf要小,在内核空间只记录每个调用路径的样本和数量。</td>
+</tr>
+<tr>
+<td>数据获取方式</td>
+<td>函数调用&#x2F;退出事件</td>
+<td>通过perf event采样（Sampling）程序计数器获取程序调用信息 (<code>-g</code> 选项)</td>
+<td>通过perf event采样, 通过 eBPF 程序在内核中采样或聚合堆栈 (<code>profile</code> 工具)</td>
+</tr>
+<tr>
+<td>解栈方式</td>
+<td>无</td>
+<td>Frame Pointer&#x2F;DWARF&#x2F;LBR</td>
+<td>Frame Pointer</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>高</td>
+<td>低</td>
+<td>极低</td>
+</tr>
+<tr>
+<td>优缺点</td>
+<td>1. 性能消耗大，数据量大。2. 没有stacktrace的详细统计信息。3. 无法跟踪内联函数。</td>
+<td>1. 如果采样频率高，则数据量大，造成性能开销太高，可以自定义采样频率，降低开销。2. 兼容性好，支持内核版本广泛(自从Linux 2.6)。3. 有stacktrace的详细统计信息。4.可以生成火焰图</td>
+<td>1. ebpf在内核空间对样本进行整合，然后传输数据到用户空间，性能优于perf-record。2.stacktrace的详细统计信息。3.可以生成火焰图。</td>
+</tr>
+</tbody></table>
+<p>所以综合来说，在Linux 4.9内核及以后版本的系统中使用bcc-profile是最佳选择；而perf-record的适用范围更广的内核本版，灵活性不会让你失望；ftrace由于性能损失较大，建议还是压箱底比较好。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h2><p>[1] <a class="link"   target="_blank" rel="noopener" href="https://perfwiki.github.io/main/" >https://perfwiki.github.io/main/<i class="fas fa-external-link-alt"></i></a><br>[2] <a class="link"   target="_blank" rel="noopener" href="https://www.whexy.com/en/posts/PMU" >https://www.whexy.com/en/posts/PMU<i class="fas fa-external-link-alt"></i></a><br>[3] <a class="link"   target="_blank" rel="noopener" href="https://www.polarsignals.com/blog/posts/2022/11/29/dwarf-based-stack-walking-using-ebpf" >https://www.polarsignals.com/blog/posts/2022/11/29/dwarf-based-stack-walking-using-ebpf<i class="fas fa-external-link-alt"></i></a><br>[4] <a class="link"   target="_blank" rel="noopener" href="https://developers.redhat.com/articles/2023/07/31/frame-pointers-untangling-unwinding#" >https://developers.redhat.com/articles/2023/07/31/frame-pointers-untangling-unwinding#<i class="fas fa-external-link-alt"></i></a><br>[5] <a class="link"   target="_blank" rel="noopener" href="https://www.brendangregg.com/ebpf.html" >https://www.brendangregg.com/ebpf.html<i class="fas fa-external-link-alt"></i></a></p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/10/13/user_space/signal_debug/"
+                                   title="Linux调试signal"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Linux调试signal</span>
+                                        <span class="post-nav-item">Next posts</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2020</span>&nbsp;-&nbsp;2025
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Keep Team</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        Powered by&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;&&nbsp;Theme&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
